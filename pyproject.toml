@@ -10,11 +10,21 @@ dependencies = [
     "langchain-tavily>=0.2.13",
     "langgraph>=1.0.4",
     "pydantic>=2.12.5",
+    "rich>=14.2.0",
     "typer>=0.20.0",
 ]
 
 [dependency-groups]
 dev = [
     "mypy>=1.19.0",
+    "pytest>=9.0.2",
+    "pytest-camel-collect>=1.0.2",
     "ruff>=0.14.8",
 ]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "--strict-markers"
+testpaths = ["tests"]
+python_classes = ["Test*", "Describe*", "When*", "Context*"]
+python_functions = ["test_*", "it_*", "should_*"]

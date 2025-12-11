@@ -1,11 +1,15 @@
-from typing import Annotated, cast
+from typing import Annotated
 
 import typer
-from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.messages import HumanMessage
+from rich.console import Console
+from rich.markdown import Markdown
 
 from virgo.graph import builder
+from virgo.schemas import MarkdownArticle
 
 app = typer.Typer()
+console = Console()
 
 
 @app.command()
@@ -18,9 +22,23 @@ def generate(
     graph = builder.compile()
 
     message = HumanMessage(content=input)
-    res = graph.invoke({"messages": [message]})  # type: ignore[arg-type]
 
-    typer.secho(cast(BaseMessage, res["messages"][-1]).content, fg=typer.colors.GREEN)
+    with console.status("[bold green]Generating article...[/bold green]"):
+        res = graph.invoke({"messages": [message]})  # type: ignore[arg-type]
+
+    formatted_article: MarkdownArticle | None = res.get("formatted_article")
+    if formatted_article:
+        markdown_content = formatted_article.to_markdown()
+        console.print(Markdown(markdown_content))
+    else:
+        # Fallback to raw message if formatting failed
+        from typing import cast
+
+        from langchain_core.messages import BaseMessage
+
+        typer.secho(
+            cast(BaseMessage, res["messages"][-1]).content, fg=typer.colors.YELLOW
+        )
 
 
 if __name__ == "__main__":

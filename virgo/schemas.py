@@ -34,8 +34,44 @@ class Revised(Answer):
     )
 
 
+class MarkdownArticle(BaseModel):
+    """A well-formatted Markdown article."""
+
+    title: str = Field(
+        description="Article title (without # prefix, will be added during rendering)."
+    )
+    summary: str = Field(description="A brief 1-2 sentence summary of the article.")
+    content: str = Field(
+        description="The main article content formatted in Markdown with proper headings (##, ###), "
+        "**bold** for key terms, bullet points, and numbered lists where appropriate."
+    )
+    references: list[str] = Field(
+        default_factory=list,
+        description="List of references formatted as Markdown links: [1] [Title](URL) - Description",
+    )
+
+    def to_markdown(self) -> str:
+        """Convert the article to a complete Markdown string.
+
+        Returns:
+            str: The full Markdown-formatted article.
+        """
+        parts = [
+            f"# {self.title}",
+            "",
+            f"*{self.summary}*",
+            "",
+            self.content,
+        ]
+        if self.references:
+            parts.extend(["", "## References", ""])
+            parts.extend(self.references)
+        return "\n".join(parts)
+
+
 __all__ = [
     "Answer",
-    "Revised",
+    "MarkdownArticle",
     "Reflection",
+    "Revised",
 ]
