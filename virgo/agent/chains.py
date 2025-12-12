@@ -11,7 +11,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.prompts.chat import MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 
-from virgo.schemas import Answer, MarkdownArticle, Revised
+from virgo.agent.schemas import Answer, MarkdownArticle, Revised
 
 _llm = ChatOpenAI(
     model="gpt-4-turbo",

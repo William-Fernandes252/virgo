@@ -55,10 +55,10 @@ class DescribeVirgoNodes:
 
 
 class DescribeAnswerTypedDict:
-    """Tests for the Answer TypedDict."""
+    """Tests for the AnswerState TypedDict."""
 
     def it_accepts_messages_list(self):
-        """Verify Answer accepts messages list."""
+        """Verify AnswerState accepts messages list."""
         answer: AnswerState = {
             "messages": [HumanMessage(content="test")],
             "formatted_article": None,
@@ -66,7 +66,7 @@ class DescribeAnswerTypedDict:
         assert len(answer["messages"]) == 1
 
     def it_accepts_formatted_article(self):
-        """Verify Answer accepts formatted_article."""
+        """Verify AnswerState accepts formatted_article."""
         article = MarkdownArticle(
             title="Test",
             summary="Summary",
@@ -79,7 +79,7 @@ class DescribeAnswerTypedDict:
         assert answer["formatted_article"] == article
 
     def it_accepts_none_formatted_article(self):
-        """Verify Answer accepts None for formatted_article."""
+        """Verify AnswerState accepts None for formatted_article."""
         answer: AnswerState = {
             "messages": [],
             "formatted_article": None,
@@ -204,7 +204,7 @@ class DescribeFormatNode:
             content="Content",
         )
 
-        with patch("virgo.graph.markdown_formatter") as mock_formatter:
+        with patch("virgo.agent.graph.markdown_formatter") as mock_formatter:
             # Mock the chain to return our article
             mock_chain = mock_formatter.__or__.return_value
             mock_chain.invoke.return_value = [mock_article]
@@ -363,10 +363,10 @@ class DescribeGraphInvocation:
         )
 
         with (
-            patch("virgo.graph.first_responder") as mock_first_responder,
-            patch("virgo.graph.revisor") as mock_revisor,
-            patch("virgo.graph.execute_tools") as mock_execute_tools,
-            patch("virgo.graph.markdown_formatter") as mock_formatter,
+            patch("virgo.agent.graph.first_responder") as mock_first_responder,
+            patch("virgo.agent.graph.revisor") as mock_revisor,
+            patch("virgo.agent.graph.execute_tools") as mock_execute_tools,
+            patch("virgo.agent.graph.markdown_formatter") as mock_formatter,
         ):
             # Configure mocks
             mock_first_responder.invoke.return_value = draft_response
@@ -454,10 +454,10 @@ class DescribeGraphInvocation:
         )
 
         with (
-            patch("virgo.graph.first_responder") as mock_first_responder,
-            patch("virgo.graph.revisor") as mock_revisor,
-            patch("virgo.graph.execute_tools") as mock_execute_tools,
-            patch("virgo.graph.markdown_formatter") as mock_formatter,
+            patch("virgo.agent.graph.first_responder") as mock_first_responder,
+            patch("virgo.agent.graph.revisor") as mock_revisor,
+            patch("virgo.agent.graph.execute_tools") as mock_execute_tools,
+            patch("virgo.agent.graph.markdown_formatter") as mock_formatter,
         ):
             mock_first_responder.invoke.return_value = draft_response
             mock_revisor.invoke.return_value = revised_response
@@ -537,10 +537,10 @@ class DescribeGraphInvocation:
         )
 
         with (
-            patch("virgo.graph.first_responder") as mock_first_responder,
-            patch("virgo.graph.revisor") as mock_revisor,
-            patch("virgo.graph.execute_tools") as mock_execute_tools,
-            patch("virgo.graph.markdown_formatter") as mock_formatter,
+            patch("virgo.agent.graph.first_responder") as mock_first_responder,
+            patch("virgo.agent.graph.revisor") as mock_revisor,
+            patch("virgo.agent.graph.execute_tools") as mock_execute_tools,
+            patch("virgo.agent.graph.markdown_formatter") as mock_formatter,
         ):
             mock_first_responder.invoke.return_value = draft_response
             mock_revisor.invoke.return_value = revised_response
