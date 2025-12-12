@@ -17,6 +17,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "agentevals>=0.0.9",
+    "langchain-ollama>=0.3.3",
     "mypy>=1.19.0",
     "pytest>=9.0.2",
     "pytest-camel-collect>=1.0.2",
@@ -26,6 +28,6 @@ dev = [
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = "--strict-markers"
-testpaths = ["tests"]
+testpaths = ["tests", "integration"]
 python_classes = ["Test*", "Describe*", "When*", "Context*"]
 python_functions = ["test_*", "it_*", "should_*"]
