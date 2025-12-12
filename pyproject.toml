@@ -20,14 +20,27 @@ dev = [
     "agentevals>=0.0.9",
     "langchain-ollama>=0.3.3",
     "mypy>=1.19.0",
+    "pre-commit>=4.5.0",
     "pytest>=9.0.2",
     "pytest-camel-collect>=1.0.2",
+    "pytest-watcher>=0.4.3",
     "ruff>=0.14.8",
+    "taskipy>=1.14.1",
 ]
+
+[tool.taskipy.tasks]
+lint = "ruff check . --fix"
+"lint:ci" = "ruff check ."
+format = "ruff format . --fix"
+"format:ci" = "ruff format . --check"
+type-check = "mypy virgo tests integration"
+test = "pytest"
+"test:watch" = "pytest-watcher"
+integration = "pytest integration"
 
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = "--strict-markers"
-testpaths = ["tests", "integration"]
+testpaths = ["tests"]
 python_classes = ["Test*", "Describe*", "When*", "Context*"]
 python_functions = ["test_*", "it_*", "should_*"]
