@@ -1,10 +1,10 @@
 from typing import Annotated
 
 import typer
-from langchain_core.messages import HumanMessage
 from rich.console import Console
 from rich.markdown import Markdown
 
+from virgo import Virgo
 from virgo.graph import builder
 from virgo.schemas import MarkdownArticle
 
@@ -19,12 +19,10 @@ def generate(
     ],
 ):
     """Generate an article using the Virgo assistant."""
-    graph = builder.compile()
-
-    message = HumanMessage(content=input)
+    virgo = Virgo(builder)
 
     with console.status("[bold green]Generating article...[/bold green]"):
-        res = graph.invoke({"messages": [message]})  # type: ignore[arg-type]
+        res = virgo.generate(input)
 
     formatted_article: MarkdownArticle | None = res.get("formatted_article")
     if formatted_article:

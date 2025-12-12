@@ -98,23 +98,6 @@ def _format_node(state: Answer) -> Answer:
     return Answer(messages=[], formatted_article=formatted_article)
 
 
-# Define the state graph for Virgo
-builder = StateGraph(state_schema=Answer)
-
-# Add the nodes to the graph
-builder.add_node(_VirgoNodes.DRAFT.value, _first_responder_node)
-builder.add_node(_VirgoNodes.EXECUTE_TOOLS.value, execute_tools)
-builder.add_node(_VirgoNodes.REVISE.value, _revisor_node)
-builder.add_node(_VirgoNodes.FORMAT.value, _format_node)
-
-# Define the edges between the nodes
-builder.add_edge(_VirgoNodes.DRAFT.value, _VirgoNodes.EXECUTE_TOOLS.value)
-builder.add_edge(_VirgoNodes.EXECUTE_TOOLS.value, _VirgoNodes.REVISE.value)
-
-# Define the entry point of the graph
-builder.set_entry_point(_VirgoNodes.DRAFT.value)
-
-
 # Define the event loop for the graph
 def _event_loop(state: Answer) -> str:
     """The event loop that runs the graph until the final answer is produced, or the maximum number of iterations is reached.
@@ -132,15 +115,43 @@ def _event_loop(state: Answer) -> str:
     return _VirgoNodes.EXECUTE_TOOLS.value
 
 
-builder.add_conditional_edges(
-    _VirgoNodes.REVISE.value,
-    _event_loop,
-)
+def create_graph_builder() -> StateGraph:
+    """Create the state graph builder for Virgo.
 
-# Add edge from FORMAT to END
-builder.add_edge(_VirgoNodes.FORMAT.value, END)
+    Returns:
+        StateGraph: The state graph builder for Virgo.
+    """
+    builder = StateGraph(state_schema=Answer)
 
+    # Add the nodes to the graph
+    builder.add_node(_VirgoNodes.DRAFT.value, _first_responder_node)
+    builder.add_node(_VirgoNodes.EXECUTE_TOOLS.value, execute_tools)
+    builder.add_node(_VirgoNodes.REVISE.value, _revisor_node)
+    builder.add_node(_VirgoNodes.FORMAT.value, _format_node)
+
+    # Define the edges between the nodes
+    builder.add_edge(_VirgoNodes.DRAFT.value, _VirgoNodes.EXECUTE_TOOLS.value)
+    builder.add_edge(_VirgoNodes.EXECUTE_TOOLS.value, _VirgoNodes.REVISE.value)
+
+    # Define the entry point of the graph
+    builder.set_entry_point(_VirgoNodes.DRAFT.value)
+
+    builder.add_conditional_edges(
+        _VirgoNodes.REVISE.value,
+        _event_loop,
+    )
+
+    # Add edge from FORMAT to END
+    builder.add_edge(_VirgoNodes.FORMAT.value, END)
+
+    return builder
+
+
+# Define the state graph for Virgo
+builder = create_graph_builder()
+"""The state graph builder for Virgo."""
 
 __all__ = [
     "builder",
+    "create_graph_builder",
 ]
