@@ -54,7 +54,7 @@ Workflow overview:
 ## Common Commands
 
 - Show help: `virgo --help`
-- Generate/review (example): `virgo generate --topic "AI safety"`
+- Generate/review (example): `virgo generate "AI safety"`
 
 ## For Contributors
 
