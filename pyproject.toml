@@ -52,3 +52,6 @@ addopts = "--strict-markers"
 testpaths = ["tests"]
 python_classes = ["Test*", "Describe*", "When*", "Context*"]
 python_functions = ["test_*", "it_*", "should_*"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["virgo"]
