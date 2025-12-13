@@ -7,7 +7,7 @@ Virgo is a command-line assistant that helps you generate, review, and improve a
 1) Install (from PyPI):
 
 ```bash
-pip install virgo
+pip install virgo-agent
 ```
 
 1) Configure your environment (see next section), then run:

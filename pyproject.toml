@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "virgo"
+name = "virgo-agent"
 version = "0.1.0"
 description = "Assistant to generate, review and improve articles."
 readme = "README.md"
