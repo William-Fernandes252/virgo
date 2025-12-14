@@ -1,14 +1,10 @@
 """Module for managing GenAI providers and creating language model instances."""
 
 from abc import ABC, abstractmethod
-from collections.abc import Callable
 from typing import override
 
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
-
-type _BaseModelProvider = Callable[[str], BaseChatModel]
-"""Module for managing GenAI providers and creating language model instances."""
 
 
 class ProviderError(Exception):
