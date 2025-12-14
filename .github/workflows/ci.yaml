@@ -149,8 +149,22 @@ jobs:
       - name: Wait for Ollama to be ready
         run: |
           echo "Waiting for Ollama to be ready..."
-          timeout 300 bash -c 'until curl -s http://localhost:11434/api/tags > /dev/null 2>&1; do sleep 5; done'
-          echo "Ollama is ready!"
+          for i in {1..60}; do
+            if curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
+              echo "✅ Ollama is ready!"
+              exit 0
+            fi
+
+            if ! docker compose -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.ci.yaml ps --services --filter "status=running" | grep -q "ollama"; then
+              echo "❌ Ollama container stopped unexpectedly!"
+              docker compose -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.ci.yaml logs ollama
+              exit 1
+            fi
+
+            sleep 5
+          done
+          echo "❌ Timeout waiting for Ollama to be ready"
+          exit 1
 
       - name: Run integration tests
         run: uv run task integration
