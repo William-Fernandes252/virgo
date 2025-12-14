@@ -41,7 +41,7 @@ jobs:
     needs: [build]
     environment:
       name: pypi
-      url: https://pypi.org/project/virgo/
+      url: https://pypi.org/project/virgo-agent/
     steps:
       - name: Download distribution artifacts
         uses: actions/download-artifact@v4
