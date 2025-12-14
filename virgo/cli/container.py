@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from dependency_injector import containers, providers
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from virgo.actions import GenerateArticleAction
 from virgo.agent.factories import create_virgo_agent
@@ -20,6 +20,8 @@ type _GenAIProvider = Literal["openai", "ollama"]
 
 class VirgoSettings(BaseSettings):
     """Settings for the Virgo application."""
+
+    model_config = SettingsConfigDict(env_prefix="virgo_")
 
     genai_provider: Annotated[
         _GenAIProvider,
