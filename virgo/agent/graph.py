@@ -95,7 +95,7 @@ def create_revisor_node(
         """
         return AnswerState(
             messages=[
-                chain.invoke({"messages": state["messages"], "formatted_article": None})
+                chain.invoke({"messages": state["messages"]})
             ],
             formatted_article=None,
         )
