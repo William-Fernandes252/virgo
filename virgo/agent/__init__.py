@@ -2,6 +2,7 @@
 
 from typing import Self
 
+from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage
 
 from virgo.agent.chains import (
@@ -20,8 +21,8 @@ class VirgoAgent:
         """Initialize the Virgo agent.
 
         Args:
-            graph_builder: Optional StateGraph builder. If not provided,
-                          creates a new one using create_graph_builder().
+            graph_builder: The state graph builder for the Virgo agent.
+
         """
         self._builder = graph_builder
         self._graph = self._builder.compile()
@@ -40,7 +41,7 @@ class VirgoAgent:
         return result.get("formatted_article")
 
     @classmethod
-    def from_llm(cls, llm) -> Self:
+    def from_llm(cls, llm: BaseChatModel) -> Self:
         """Create a VirgoAgent instance from a language model.
 
         Args:
