@@ -2,6 +2,7 @@
 
 from unittest.mock import Mock
 
+from dependency_injector import providers
 from typer.testing import CliRunner
 
 from virgo.agent.schemas import MarkdownArticle
@@ -74,27 +75,35 @@ class DescribeContainer:
         """Verify container provides GenerateArticleAction."""
         from virgo.actions import GenerateArticleAction
 
-        action = container.generate_action()
+        dummy_agent = Mock()
+        with container._agent.override(providers.Object(dummy_agent)):
+            action = container.generate_action()
 
         assert isinstance(action, GenerateArticleAction)
 
     def it_provides_singleton_agent(self):
         """Verify container provides same agent instance."""
-        agent1 = container.agent()
-        agent2 = container.agent()
+        dummy_agent = Mock()
+        with container._agent.override(providers.Object(dummy_agent)):
+            agent1 = container._agent()
+            agent2 = container._agent()
 
         assert agent1 is agent2
 
     def it_provides_new_action_per_call(self):
         """Verify container creates new action instance per call."""
-        action1 = container.generate_action()
-        action2 = container.generate_action()
+        dummy_agent = Mock()
+        with container._agent.override(providers.Object(dummy_agent)):
+            action1 = container.generate_action()
+            action2 = container.generate_action()
 
         assert action1 is not action2
 
     def it_injects_agent_into_action(self):
         """Verify action receives the agent as generator."""
-        action = container.generate_action()
-        agent = container.agent()
+        dummy_agent = Mock()
+        with container._agent.override(providers.Object(dummy_agent)):
+            action = container.generate_action()
+            agent = container._agent()
 
         assert action.generator is agent

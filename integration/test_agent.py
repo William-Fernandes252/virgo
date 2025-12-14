@@ -19,6 +19,17 @@ from virgo.agent.schemas import MarkdownArticle
 class DescribeVirgoAgent:
     """Integration tests for VirgoAgent."""
 
+    @pytest.fixture
+    def virgo_agent_stub(self) -> VirgoAgent:
+        """Lightweight VirgoAgent stub for tests that patch generate()."""
+
+        class VirgoAgentStub(VirgoAgent):
+            def __init__(self) -> None:  # pragma: no cover - simple test helper
+                self._builder = None  # type: ignore[assignment]
+                self._graph = None  # type: ignore[assignment]
+
+        return VirgoAgentStub()
+
     class DescribeTrajectoryEvaluation:
         """Tests for agent trajectory evaluation."""
 
@@ -183,7 +194,9 @@ class DescribeVirgoAgent:
     class DescribeAgentOutput:
         """Tests for agent output validation."""
 
-        def it_should_generate_markdown_article_structure(self) -> None:
+        def it_should_generate_markdown_article_structure(
+            self, virgo_agent_stub: VirgoAgent
+        ) -> None:
             """Test that the agent generates a properly structured MarkdownArticle."""
             # Create a mock graph that returns a valid MarkdownArticle
             mock_article = MarkdownArticle(
@@ -194,8 +207,7 @@ class DescribeVirgoAgent:
             )
 
             with patch.object(VirgoAgent, "generate", return_value=mock_article):
-                agent = VirgoAgent()
-                result = agent.generate("What is Python?")
+                result = virgo_agent_stub.generate("What is Python?")
 
                 assert result is not None
                 assert isinstance(result, MarkdownArticle)
@@ -203,11 +215,12 @@ class DescribeVirgoAgent:
                 assert len(result.content) > 0
                 assert len(result.references) > 0
 
-        def it_should_return_none_for_failed_generation(self) -> None:
+        def it_should_return_none_for_failed_generation(
+            self, virgo_agent_stub: VirgoAgent
+        ) -> None:
             """Test that the agent returns None when generation fails."""
             with patch.object(VirgoAgent, "generate", return_value=None):
-                agent = VirgoAgent()
-                result = agent.generate("Invalid query")
+                result = virgo_agent_stub.generate("Invalid query")
 
                 assert result is None
 

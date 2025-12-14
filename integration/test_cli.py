@@ -41,7 +41,7 @@ class DescribeCLIIntegration:
             mock_agent = MagicMock()
             mock_agent.generate.return_value = mock_article
 
-            with test_container.agent.override(mock_agent):
+            with test_container._agent.override(mock_agent):
                 result = runner.invoke(app, ["generate", "What is Python?"])
 
                 assert result.exit_code == 0
@@ -52,7 +52,7 @@ class DescribeCLIIntegration:
             mock_agent = MagicMock()
             mock_agent.generate.return_value = None
 
-            with test_container.agent.override(mock_agent):
+            with test_container._agent.override(mock_agent):
                 result = runner.invoke(app, ["generate", "What is Python?"])
 
                 # Should not crash, may show error message
@@ -70,7 +70,7 @@ class DescribeCLIIntegration:
 
             test_question = "What are the benefits of TypeScript?"
 
-            with test_container.agent.override(mock_agent):
+            with test_container._agent.override(mock_agent):
                 runner.invoke(app, ["generate", test_question])
 
                 mock_agent.generate.assert_called_once_with(test_question)
@@ -88,7 +88,7 @@ class DescribeCLIIntegration:
                 references=[],
             )
 
-            with test_container.agent.override(mock_agent):
+            with test_container._agent.override(mock_agent):
                 runner.invoke(app, ["generate", "Test question"])
 
                 # Verify the mock was used
@@ -111,7 +111,7 @@ class DescribeCLIIntegration:
 
             counting_agent = CountingAgent()
 
-            with test_container.agent.override(counting_agent):
+            with test_container._agent.override(counting_agent):
                 runner.invoke(app, ["generate", "Question 1"])
                 runner.invoke(app, ["generate", "Question 2"])
 
@@ -133,7 +133,7 @@ class DescribeCLIOutput:
         mock_agent = MagicMock()
         mock_agent.generate.return_value = mock_article
 
-        with test_container.agent.override(mock_agent):
+        with test_container._agent.override(mock_agent):
             result = runner.invoke(app, ["generate", "Test question"])
 
             # Check that some output was produced
@@ -151,7 +151,7 @@ class DescribeCLIOutput:
         mock_agent = MagicMock()
         mock_agent.generate.return_value = mock_article
 
-        with test_container.agent.override(mock_agent):
+        with test_container._agent.override(mock_agent):
             result = runner.invoke(app, ["generate", "Test question"])
 
             assert result.exit_code == 0
@@ -172,7 +172,7 @@ class DescribeCLIErrorHandling:
         mock_agent = MagicMock()
         mock_agent.generate.side_effect = Exception("Agent error")
 
-        with test_container.agent.override(mock_agent):
+        with test_container._agent.override(mock_agent):
             result = runner.invoke(app, ["generate", "Test question"])
 
             # Should not crash with unhandled exception
