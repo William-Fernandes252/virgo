@@ -94,9 +94,7 @@ def create_revisor_node(
             AnswerState: The updated state of the graph with the revised answer.
         """
         return AnswerState(
-            messages=[
-                chain.invoke({"messages": state["messages"]})
-            ],
+            messages=[chain.invoke({"messages": state["messages"]})],
             formatted_article=None,
         )
 
@@ -216,6 +214,5 @@ def create_graph_builder(
 
 __all__ = [
     "AnswerState",
-    "VirgoStateGraph",
     "create_graph_builder",
 ]
