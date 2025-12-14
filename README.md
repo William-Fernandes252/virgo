@@ -3,7 +3,7 @@
 [![pypi](https://img.shields.io/pypi/v/virgo-agent.svg)](https://pypi.org/project/virgo-agent/)
 [![python](https://img.shields.io/pypi/pyversions/virgo-agent.svg)](https://pypi.org/project/virgo-agent/)
 [![Build Status](https://github.com/William-Fernandes252/virgo/actions/workflows/ci.yaml/badge.svg)](https://github.com/William-Fernandes252/virgo/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/gh/William-Fernandes252/virgo/graph/badge.svg?token=D8S6AF7A3Q)](https://codecov.io/gh/William-Fernandes252/virgo)
+[![codecov](https://codecov.io/gh/William-Fernandes252/virgo/branch/master/graph/badge.svg?token=bcPzCjDnSk)](https://codecov.io/gh/William-Fernandes252/virgo)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 Virgo is a command-line assistant that helps you generate, review, and improve articles. It blends retrieval (Tavily), reasoning (LangChain + LangGraph), and drafting (OpenAI) into a guided flow so you can go from idea to polished copy quickly.
