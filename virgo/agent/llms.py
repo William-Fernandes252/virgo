@@ -33,9 +33,6 @@ class LanguageModelProvider(ABC):
 class OpenAILanguageModelProvider(LanguageModelProvider):
     """Language model provider for OpenAI."""
 
-    def __init__(self) -> None:
-        """Initialize the OpenAI language model provider."""
-
     @override
     def get_chat_model(self, model_name: str) -> BaseChatModel:
         return ChatOpenAI(model=model_name)
