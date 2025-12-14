@@ -123,7 +123,7 @@ class DescribeActionDependencyInjection:
             references=[],
         )
 
-        with container.agent.override(mock_agent):
+        with container._agent.override(mock_agent):
             action = container.generate_action()
             result = action.execute("Container test question")
 
@@ -137,7 +137,7 @@ class DescribeActionDependencyInjection:
         container = Container()
 
         mock_agent = MagicMock()
-        with container.agent.override(mock_agent):
+        with container._agent.override(mock_agent):
             action1 = container.generate_action()
             action2 = container.generate_action()
 
@@ -151,7 +151,7 @@ class DescribeActionDependencyInjection:
         container = Container()
 
         mock_agent = MagicMock()
-        with container.agent.override(mock_agent):
+        with container._agent.override(mock_agent):
             action1 = container.generate_action()
             action2 = container.generate_action()
 

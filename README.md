@@ -14,6 +14,9 @@ Virgo is a command-line assistant that helps you generate, review, and improve a
 
 ```bash
 pip install virgo-agent
+
+# Optional: add Ollama provider support
+pip install "virgo-agent[ollama]"
 ```
 
 1) Configure your environment (see next section), then run:
@@ -34,6 +37,9 @@ Set these variables before running Virgo:
 | `LANGSMITH_TRACING` | Optional | Enable LangSmith tracing (`true`/`false`) |
 | `LANGSMITH_ENDPOINT` | Optional | Override LangSmith endpoint |
 | `LANGSMITH_PROJECT` | Optional | LangSmith project name |
+| `VIRGO_GENAI_PROVIDER` | Optional | `openai` (default) or `ollama` |
+| `VIRGO_MODEL_NAME` | Optional | Model name for the chosen provider (default `gpt-4-turbo`) |
+| `VIRGO_MAX_ITERATIONS` | Optional | Max tool iterations the agent will run (default `5`) |
 | `OLLAMA_MODEL` | Optional | Model name for local integration tests (e.g., `llama3.2:1b`) |
 | `OLLAMA_BASE_URL` | Optional | Ollama base URL (e.g., `http://localhost:11434`) |
 
@@ -48,6 +54,7 @@ Tips:
 - **LangGraph** wires these steps into a controllable graph: gather context → draft → critique → refine.
 - **Tavily** performs targeted web searches to pull fresh facts and references.
 - **OpenAI** provides the language model for generation and editing.
+- **Ollama** can be used as an alternative model provider when installed (`virgo-agent[ollama]`) and selected via `VIRGO_GENAI_PROVIDER=ollama`.
 - **Rich** and **Typer** power the CLI experience (progress, prompts, commands).
 
 Workflow overview:
