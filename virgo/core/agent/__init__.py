@@ -5,13 +5,13 @@ from typing import Self
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage
 
-from virgo.agent.chains import (
+from virgo.core.agent.chains import (
     create_first_responder_chain,
     create_markdown_formatter_chain,
     create_revisor_chain,
 )
-from virgo.agent.graph import VirgoStateGraph, create_graph_builder
-from virgo.agent.schemas import MarkdownArticle
+from virgo.core.agent.graph import VirgoStateGraph, create_graph_builder
+from virgo.core.agent.schemas import MarkdownArticle
 
 
 class VirgoAgent:

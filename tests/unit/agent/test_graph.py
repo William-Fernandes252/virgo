@@ -4,7 +4,7 @@ from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_core.runnables import RunnableLambda
 from langgraph.graph import StateGraph
 
-from virgo.agent.graph import (
+from virgo.core.agent.graph import (
     VIRGO_MAX_ITERATIONS,
     AnswerState,
     _event_loop,
@@ -12,7 +12,7 @@ from virgo.agent.graph import (
     create_format_node,
     create_graph_builder,
 )
-from virgo.agent.schemas import MarkdownArticle
+from virgo.core.agent.schemas import MarkdownArticle
 
 
 class DescribeVirgoMaxIterations:

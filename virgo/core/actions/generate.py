@@ -2,8 +2,8 @@
 
 from dataclasses import dataclass
 
-from virgo.actions.protocols import ArticleGenerator
-from virgo.agent.schemas import MarkdownArticle
+from virgo.core.actions.protocols import ArticleGenerator
+from virgo.core.agent.schemas import MarkdownArticle
 
 
 @dataclass
@@ -17,8 +17,8 @@ class GenerateArticleAction:
     Example usage with dependency-injector:
         ```python
         from dependency_injector import containers, providers
-        from virgo.actions import GenerateArticleAction
-        from virgo.agent import VirgoAgent
+        from virgo.core.actions import GenerateArticleAction
+        from virgo.core.agent import VirgoAgent
 
         class Container(containers.DeclarativeContainer):
             agent = providers.Singleton(VirgoAgent)

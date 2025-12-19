@@ -2,7 +2,7 @@
 
 from typing import Protocol
 
-from virgo.agent.schemas import MarkdownArticle
+from virgo.core.agent.schemas import MarkdownArticle
 
 
 class ArticleGenerator(Protocol):

@@ -3,8 +3,11 @@
 import pytest
 from dependency_injector import providers
 
-from virgo.agent.llms import OllamaLanguageModelProvider, OpenAILanguageModelProvider
 from virgo.cli.container import Container, VirgoSettings
+from virgo.core.agent.llms import (
+    OllamaLanguageModelProvider,
+    OpenAILanguageModelProvider,
+)
 
 
 class DescribeVirgoSettings:

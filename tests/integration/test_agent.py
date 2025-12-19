@@ -12,8 +12,8 @@ from agentevals.trajectory.match import (  # type: ignore[import-untyped]
     create_trajectory_match_evaluator,
 )
 
-from virgo.agent import VirgoAgent
-from virgo.agent.schemas import MarkdownArticle
+from virgo.core.agent import VirgoAgent
+from virgo.core.agent.schemas import MarkdownArticle
 
 
 class DescribeVirgoAgent:
@@ -300,7 +300,7 @@ class DescribeGraphTrajectory:
     def it_should_respect_max_iterations(self) -> None:
         """Test that the agent respects the maximum iterations limit."""
         # Verify that VIRGO_MAX_ITERATIONS is respected
-        from virgo.agent.graph import VIRGO_MAX_ITERATIONS
+        from virgo.core.agent.graph import VIRGO_MAX_ITERATIONS
 
         assert VIRGO_MAX_ITERATIONS > 0, "Max iterations should be positive"
         assert VIRGO_MAX_ITERATIONS <= 10, "Max iterations should be reasonable"

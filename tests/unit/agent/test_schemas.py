@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from virgo.agent.schemas import Answer, MarkdownArticle, Reflection, Revised
+from virgo.core.agent.schemas import Answer, MarkdownArticle, Reflection, Revised
 
 
 class DescribeReflection:

@@ -5,9 +5,9 @@ from unittest.mock import MagicMock
 import pytest
 from typer.testing import CliRunner
 
-from virgo.agent.schemas import MarkdownArticle
 from virgo.cli import app
 from virgo.cli.container import Container
+from virgo.core.agent.schemas import MarkdownArticle
 
 runner = CliRunner()
 

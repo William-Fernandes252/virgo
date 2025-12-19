@@ -1,7 +1,7 @@
 """Unit tests for the virgo.actions.protocols module."""
 
-from virgo.actions.protocols import ArticleGenerator
-from virgo.agent.schemas import MarkdownArticle
+from virgo.core.actions.protocols import ArticleGenerator
+from virgo.core.agent.schemas import MarkdownArticle
 
 
 class DescribeArticleGeneratorProtocol:

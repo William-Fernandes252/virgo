@@ -5,8 +5,8 @@ from __future__ import annotations
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.runnables import RunnableLambda
 
-from virgo.agent import VirgoAgent
-from virgo.agent.schemas import MarkdownArticle
+from virgo.core.agent import VirgoAgent
+from virgo.core.agent.schemas import MarkdownArticle
 
 
 class DescribeVirgoAgentFromLLM:
@@ -77,22 +77,25 @@ class DescribeVirgoAgentFromLLM:
             return {"messages": tool_messages}
 
         monkeypatch.setattr(
-            "virgo.agent.chains.create_first_responder_chain", _first_responder_chain
+            "virgo.core.agent.chains.create_first_responder_chain",
+            _first_responder_chain,
         )
-        monkeypatch.setattr("virgo.agent.chains.create_revisor_chain", _revisor_chain)
         monkeypatch.setattr(
-            "virgo.agent.chains.create_markdown_formatter_chain", _formatter_chain
+            "virgo.core.agent.chains.create_revisor_chain", _revisor_chain
+        )
+        monkeypatch.setattr(
+            "virgo.core.agent.chains.create_markdown_formatter_chain", _formatter_chain
         )
         # Also patch symbols imported into virgo.agent module namespace so from_llm uses stubs
         monkeypatch.setattr(
-            "virgo.agent.create_first_responder_chain", _first_responder_chain
+            "virgo.core.agent.create_first_responder_chain", _first_responder_chain
         )
-        monkeypatch.setattr("virgo.agent.create_revisor_chain", _revisor_chain)
+        monkeypatch.setattr("virgo.core.agent.create_revisor_chain", _revisor_chain)
         monkeypatch.setattr(
-            "virgo.agent.create_markdown_formatter_chain", _formatter_chain
+            "virgo.core.agent.create_markdown_formatter_chain", _formatter_chain
         )
         monkeypatch.setattr(
-            "virgo.agent.graph.execute_tools", RunnableLambda(_execute_tools)
+            "virgo.core.agent.graph.execute_tools", RunnableLambda(_execute_tools)
         )
 
         agent = VirgoAgent.from_llm(object())

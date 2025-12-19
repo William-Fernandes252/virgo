@@ -4,9 +4,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from virgo.actions import GenerateArticleAction
-from virgo.actions.protocols import ArticleGenerator
-from virgo.agent.schemas import MarkdownArticle
+from virgo.core.actions import GenerateArticleAction
+from virgo.core.actions.protocols import ArticleGenerator
+from virgo.core.agent.schemas import MarkdownArticle
 
 
 class DescribeGenerateArticleActionIntegration:
@@ -86,7 +86,7 @@ class DescribeGenerateArticleActionIntegration:
 
         def it_should_work_with_virgo_agent(self) -> None:
             """Test that the action works with VirgoAgent as generator."""
-            from virgo.agent import VirgoAgent
+            from virgo.core.agent import VirgoAgent
 
             # Create a mock VirgoAgent
             mock_agent = MagicMock(spec=VirgoAgent)

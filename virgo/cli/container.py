@@ -6,9 +6,9 @@ from dependency_injector import containers, providers
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from virgo.actions import GenerateArticleAction
-from virgo.agent.factories import create_virgo_agent
-from virgo.agent.llms import (
+from virgo.core.actions import GenerateArticleAction
+from virgo.core.agent.factories import create_virgo_agent
+from virgo.core.agent.llms import (
     LanguageModelProvider,
     OllamaLanguageModelProvider,
     OpenAILanguageModelProvider,

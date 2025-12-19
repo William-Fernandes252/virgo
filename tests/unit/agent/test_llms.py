@@ -7,7 +7,7 @@ import types
 
 import pytest
 
-from virgo.agent.llms import (
+from virgo.core.agent.llms import (
     OllamaLanguageModelProvider,
     OpenAILanguageModelProvider,
     ProviderError,

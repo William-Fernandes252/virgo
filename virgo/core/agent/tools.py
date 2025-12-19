@@ -7,7 +7,7 @@ from langchain_core.tools import StructuredTool
 from langchain_tavily import TavilySearch
 from langgraph.prebuilt import ToolNode
 
-from virgo.agent.schemas import Answer, Revised
+from virgo.core.agent.schemas import Answer, Revised
 
 _tavily_tool = TavilySearch(max_results=5)
 """The Tavily search tool for retrieving relevant documents from the web."""

@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from langgraph.prebuilt import ToolNode
 
-from virgo.agent.tools import _run_queries, execute_tools
+from virgo.core.agent.tools import _run_queries, execute_tools
 
 
 class DescribeRunQueries:
@@ -17,7 +17,7 @@ class DescribeRunQueries:
             [{"content": "Result 2"}],
         ]
 
-        with patch("virgo.agent.tools._tavily_tool") as mock_tavily:
+        with patch("virgo.core.agent.tools._tavily_tool") as mock_tavily:
             mock_tavily.batch.return_value = mock_results
 
             queries = ["query 1", "query 2"]
@@ -35,7 +35,7 @@ class DescribeRunQueries:
         """Verify _run_queries handles a single query."""
         mock_results = [[{"content": "Single result"}]]
 
-        with patch("virgo.agent.tools._tavily_tool") as mock_tavily:
+        with patch("virgo.core.agent.tools._tavily_tool") as mock_tavily:
             mock_tavily.batch.return_value = mock_results
 
             result = _run_queries(["single query"])
@@ -45,7 +45,7 @@ class DescribeRunQueries:
 
     def it_handles_empty_query_list(self):
         """Verify _run_queries handles empty query list."""
-        with patch("virgo.agent.tools._tavily_tool") as mock_tavily:
+        with patch("virgo.core.agent.tools._tavily_tool") as mock_tavily:
             mock_tavily.batch.return_value = []
 
             result = _run_queries([])
@@ -61,7 +61,7 @@ class DescribeRunQueries:
             [{"url": "https://demo.com", "content": "Content 3"}],
         ]
 
-        with patch("virgo.agent.tools._tavily_tool") as mock_tavily:
+        with patch("virgo.core.agent.tools._tavily_tool") as mock_tavily:
             mock_tavily.batch.return_value = expected_results
 
             result = _run_queries(["q1", "q2", "q3"])

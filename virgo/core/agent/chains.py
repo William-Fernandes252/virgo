@@ -10,8 +10,8 @@ from langchain_core.output_parsers.openai_tools import (
 from langchain_core.runnables import RunnableSerializable
 from langchain_openai import ChatOpenAI
 
-from virgo.agent.prompts import ACTOR_PROMPT, MARKDOWN_FORMATTER_PROMPT
-from virgo.agent.schemas import Answer, MarkdownArticle, Revised
+from virgo.core.agent.prompts import ACTOR_PROMPT, MARKDOWN_FORMATTER_PROMPT
+from virgo.core.agent.schemas import Answer, MarkdownArticle, Revised
 
 
 def create_markdown_formatter_chain(

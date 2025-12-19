@@ -5,8 +5,8 @@ from unittest.mock import Mock
 from dependency_injector import providers
 from typer.testing import CliRunner
 
-from virgo.agent.schemas import MarkdownArticle
 from virgo.cli import app, container
+from virgo.core.agent.schemas import MarkdownArticle
 
 runner = CliRunner()
 
@@ -73,7 +73,7 @@ class DescribeContainer:
 
     def it_provides_generate_action(self):
         """Verify container provides GenerateArticleAction."""
-        from virgo.actions import GenerateArticleAction
+        from virgo.core.actions import GenerateArticleAction
 
         dummy_agent = Mock()
         with container._agent.override(providers.Object(dummy_agent)):

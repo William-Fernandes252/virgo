@@ -1,12 +1,12 @@
 from langchain_core.language_models import BaseChatModel
 
-from virgo.agent import VirgoAgent
-from virgo.agent.chains import (
+from virgo.core.agent import VirgoAgent
+from virgo.core.agent.chains import (
     create_first_responder_chain,
     create_markdown_formatter_chain,
     create_revisor_chain,
 )
-from virgo.agent.graph import create_graph_builder
+from virgo.core.agent.graph import create_graph_builder
 
 
 def create_virgo_agent(llm: BaseChatModel) -> VirgoAgent:

@@ -11,8 +11,8 @@ from langchain_core.runnables import RunnableSerializable
 from langgraph.graph import END, StateGraph
 from langgraph.graph.state import StateNode
 
-from virgo.agent.schemas import MarkdownArticle
-from virgo.agent.tools import execute_tools
+from virgo.core.agent.schemas import MarkdownArticle
+from virgo.core.agent.tools import execute_tools
 
 VIRGO_MAX_ITERATIONS = int(os.getenv("VIRGO_MAX_ITERATIONS", 5))
 """The maximum number of iterations for the Virgo graph."""

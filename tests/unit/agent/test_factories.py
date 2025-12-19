@@ -5,7 +5,7 @@ from __future__ import annotations
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableLambda
 
-from virgo.agent.factories import create_virgo_agent
+from virgo.core.agent.factories import create_virgo_agent
 
 
 class _StubToolBindingLLM:
