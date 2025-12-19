@@ -28,8 +28,11 @@ class DescribeCreateVirgoAgent:
                         "name": "Answer",
                         "args": {
                             "value": "",
-                            "reflection": {"missing": "", "superfluous": ""},
-                            "search_queries": [],
+                            "reflection": {
+                                "missing": "",
+                                "superfluous": "",
+                                "search_queries": [],
+                            },
                         },
                     }
                 ],

@@ -10,7 +10,10 @@ from virgo.core.agent.chains import (
     create_markdown_formatter_chain,
     create_revisor_chain,
 )
-from virgo.core.agent.graph import VirgoStateGraph, create_graph_builder
+from virgo.core.agent.graph import (
+    VirgoStateGraph,
+    create_graph_builder,
+)
 from virgo.core.agent.schemas import MarkdownArticle
 
 

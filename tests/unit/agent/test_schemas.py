@@ -43,7 +43,7 @@ class DescribeAnswer:
 
         assert answer.value == "This is a detailed answer about the topic."
         assert answer.reflection == reflection
-        assert answer.search_queries == []
+        assert answer.reflection.search_queries == []
 
     def it_defaults_search_queries_to_empty_list(self):
         """Verify search_queries defaults to empty list."""
@@ -52,20 +52,21 @@ class DescribeAnswer:
             reflection=Reflection(missing="None", superfluous="None"),
         )
 
-        assert answer.search_queries == []
-        assert isinstance(answer.search_queries, list)
+        assert answer.reflection.search_queries == []
+        assert isinstance(answer.reflection.search_queries, list)
 
     def it_accepts_search_queries(self):
         """Verify search_queries can be provided."""
         queries = ["query 1", "query 2", "query 3"]
         answer = Answer(
             value="Test answer",
-            reflection=Reflection(missing="None", superfluous="None"),
-            search_queries=queries,
+            reflection=Reflection(
+                missing="None", superfluous="None", search_queries=queries
+            ),
         )
 
-        assert answer.search_queries == queries
-        assert len(answer.search_queries) == 3
+        assert answer.reflection.search_queries == queries
+        assert len(answer.reflection.search_queries) == 3
 
     def it_requires_value_field(self):
         """Verify value field is required."""
@@ -89,17 +90,18 @@ class DescribeRevised:
 
     def it_creates_with_all_fields(self):
         """Verify Revised can be created with all fields."""
-        reflection = Reflection(missing="None", superfluous="None")
+        reflection = Reflection(
+            missing="None", superfluous="None", search_queries=["additional query"]
+        )
         revised = Revised(
             value="Revised answer with citations [1].",
             reflection=reflection,
-            search_queries=["additional query"],
             references=["[1] Source, 2024. https://example.com"],
         )
 
         assert revised.value == "Revised answer with citations [1]."
         assert revised.reflection == reflection
-        assert revised.search_queries == ["additional query"]
+        assert revised.reflection.search_queries == ["additional query"]
         assert revised.references == ["[1] Source, 2024. https://example.com"]
 
     def it_defaults_references_to_empty_list(self):
@@ -119,7 +121,7 @@ class DescribeRevised:
             reflection=Reflection(missing="None", superfluous="None"),
         )
 
-        assert revised.search_queries == []
+        assert revised.reflection.search_queries == []
 
 
 class DescribeMarkdownArticle:

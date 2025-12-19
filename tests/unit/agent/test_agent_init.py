@@ -22,9 +22,11 @@ class DescribeVirgoAgentFromLLM:
                             "id": "call_answer",
                             "name": "Answer",
                             "args": {
-                                "value": "Draft answer",
-                                "reflection": {"missing": "", "superfluous": ""},
-                                "search_queries": [],
+                                "reflection": {
+                                    "missing": "",
+                                    "superfluous": "",
+                                    "search_queries": [],
+                                },
                             },
                         }
                     ],
@@ -41,8 +43,11 @@ class DescribeVirgoAgentFromLLM:
                             "name": "Revised",
                             "args": {
                                 "value": "Final content with refs",
-                                "reflection": {"missing": "", "superfluous": ""},
-                                "search_queries": [],
+                                "reflection": {
+                                    "missing": "",
+                                    "superfluous": "",
+                                    "search_queries": [],
+                                },
                                 "references": ["[1] Source"],
                             },
                         }

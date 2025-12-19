@@ -58,8 +58,11 @@ class DescribeFirstResponderChain:
                     "name": "Answer",
                     "args": {
                         "value": "Test answer.",
-                        "reflection": {"missing": "", "superfluous": ""},
-                        "search_queries": [],
+                        "reflection": {
+                            "missing": "",
+                            "superfluous": "",
+                            "search_queries": [],
+                        },
                     },
                 }
             ],
@@ -123,8 +126,8 @@ class DescribeRevisorChain:
                         "reflection": {
                             "missing": "Could add more sources",
                             "superfluous": "None",
+                            "search_queries": [],
                         },
-                        "search_queries": [],
                         "references": ["[1] Test Source, 2024. https://example.com"],
                     },
                 }

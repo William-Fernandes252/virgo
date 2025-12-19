@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from langgraph.prebuilt import ToolNode
 
+from virgo.core.agent.schemas import Reflection
 from virgo.core.agent.tools import _run_queries, execute_tools
 
 
@@ -21,7 +22,10 @@ class DescribeRunQueries:
             mock_tavily.batch.return_value = mock_results
 
             queries = ["query 1", "query 2"]
-            result = _run_queries(queries)
+            reflection = Reflection(
+                missing="missing", superfluous="superfluous", search_queries=queries
+            )
+            result = _run_queries(reflection, "value")
 
             mock_tavily.batch.assert_called_once_with(
                 [
@@ -38,7 +42,12 @@ class DescribeRunQueries:
         with patch("virgo.core.agent.tools._tavily_tool") as mock_tavily:
             mock_tavily.batch.return_value = mock_results
 
-            result = _run_queries(["single query"])
+            reflection = Reflection(
+                missing="missing",
+                superfluous="superfluous",
+                search_queries=["single query"],
+            )
+            result = _run_queries(reflection, "value")
 
             mock_tavily.batch.assert_called_once_with([{"query": "single query"}])
             assert result == mock_results
@@ -48,7 +57,10 @@ class DescribeRunQueries:
         with patch("virgo.core.agent.tools._tavily_tool") as mock_tavily:
             mock_tavily.batch.return_value = []
 
-            result = _run_queries([])
+            reflection = Reflection(
+                missing="missing", superfluous="superfluous", search_queries=[]
+            )
+            result = _run_queries(reflection, "value")
 
             mock_tavily.batch.assert_called_once_with([])
             assert result == []
@@ -64,7 +76,12 @@ class DescribeRunQueries:
         with patch("virgo.core.agent.tools._tavily_tool") as mock_tavily:
             mock_tavily.batch.return_value = expected_results
 
-            result = _run_queries(["q1", "q2", "q3"])
+            reflection = Reflection(
+                missing="missing",
+                superfluous="superfluous",
+                search_queries=["q1", "q2", "q3"],
+            )
+            result = _run_queries(reflection, "value")
 
             assert result == expected_results
             assert len(result) == 3
@@ -91,22 +108,22 @@ class DescribeExecuteTools:
         """Verify execute_tools has exactly two tools."""
         assert len(execute_tools.tools_by_name) == 2
 
-    def it_answer_tool_accepts_search_queries(self):
-        """Verify Answer tool has search_queries parameter."""
+    def it_answer_tool_accepts_reflection(self):
+        """Verify Answer tool has reflection parameter."""
         answer_tool = execute_tools.tools_by_name.get("Answer")
         assert answer_tool is not None
         # Check the tool's input schema
         schema = answer_tool.args_schema
         assert schema is not None
-        assert "search_queries" in schema.model_fields
+        assert "reflection" in schema.model_fields
 
-    def it_revised_tool_accepts_search_queries(self):
-        """Verify Revised tool has search_queries parameter."""
+    def it_revised_tool_accepts_reflection(self):
+        """Verify Revised tool has reflection parameter."""
         revised_tool = execute_tools.tools_by_name.get("Revised")
         assert revised_tool is not None
         schema = revised_tool.args_schema
         assert schema is not None
-        assert "search_queries" in schema.model_fields
+        assert "reflection" in schema.model_fields
 
 
 class DescribeToolDescriptions:
