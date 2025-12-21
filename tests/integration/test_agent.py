@@ -13,6 +13,13 @@ from agentevals.trajectory.match import (  # type: ignore[import-untyped]
 )
 
 from virgo.core.agent import VirgoAgent
+from virgo.core.agent.graph.builder import (
+    DRAFT,
+    FORMAT,
+    RESEARCH,
+    REVISE,
+    VIRGO_MAX_ITERATIONS,
+)
 from virgo.core.agent.schemas import MarkdownArticle
 
 
@@ -287,20 +294,18 @@ class DescribeGraphTrajectory:
 
     def it_should_follow_expected_node_sequence(self) -> None:
         """Test that the agent follows the expected node sequence."""
-        # Expected node sequence for Virgo: draft -> execute_tools -> revise -> format
-        expected_nodes = ["draft", "execute_tools", "revise", "format"]
+        # Expected node sequence for Virgo: draft -> research -> revise -> format
+        expected_nodes = [DRAFT, RESEARCH, REVISE, FORMAT]
 
         # Verify node sequence matches expected flow
         # This is a structural test - in real integration, we'd capture from actual execution
-        assert expected_nodes[0] == "draft", "Graph should start with draft node"
-        assert expected_nodes[-1] == "format", "Graph should end with format node"
-        assert "execute_tools" in expected_nodes, "Graph should include execute_tools"
-        assert "revise" in expected_nodes, "Graph should include revise"
+        assert expected_nodes[0] == DRAFT, "Graph should start with draft node"
+        assert expected_nodes[-1] == FORMAT, "Graph should end with format node"
+        assert RESEARCH in expected_nodes, "Graph should include research"
+        assert REVISE in expected_nodes, "Graph should include revise"
 
     def it_should_respect_max_iterations(self) -> None:
         """Test that the agent respects the maximum iterations limit."""
         # Verify that VIRGO_MAX_ITERATIONS is respected
-        from virgo.core.agent.graph import VIRGO_MAX_ITERATIONS
-
         assert VIRGO_MAX_ITERATIONS > 0, "Max iterations should be positive"
         assert VIRGO_MAX_ITERATIONS <= 10, "Max iterations should be reasonable"

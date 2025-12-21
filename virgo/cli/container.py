@@ -3,16 +3,19 @@
 from typing import Annotated, Literal
 
 from dependency_injector import containers, providers
+from langchain_tavily import TavilySearch
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from virgo.core.actions import GenerateArticleAction
-from virgo.core.agent.factories import create_virgo_agent
+from virgo.core.agent import VirgoAgent
+from virgo.core.agent.graph import create_graph
 from virgo.core.agent.llms import (
     LanguageModelProvider,
     OllamaLanguageModelProvider,
     OpenAILanguageModelProvider,
 )
+from virgo.core.agent.tools import TavilyResearcher
 
 type _GenAIProvider = Literal["openai", "ollama"]
 """Supported GenAI providers."""
@@ -84,9 +87,25 @@ class Container(containers.DeclarativeContainer):
         model_name=config.model_name,
     )
 
-    _agent = providers.Singleton(
-        create_virgo_agent,
+    _tavily_tool = providers.Singleton(
+        TavilySearch,
+        max_results=5,
+    )
+
+    _researcher = providers.Callable(
+        TavilyResearcher,
+        tool=_tavily_tool,
+    )
+
+    _graph = providers.Singleton(
+        create_graph,
         llm=_chat_model,
+        researcher=_researcher,
+    )
+
+    _agent = providers.Singleton(
+        VirgoAgent,
+        graph=_graph,
     )
     """The Virgo agent singleton provider."""
 
