@@ -24,6 +24,7 @@ scripts = { "virgo" = "virgo.cli:app" }
 [dependency-groups]
 dev = [
     "agentevals>=0.0.9",
+    "factory-boy>=3.3.3",
     "langchain-ollama>=0.3.3",
     "mypy>=1.19.0",
     "pre-commit>=4.5.0",

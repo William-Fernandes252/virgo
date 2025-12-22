@@ -4,9 +4,14 @@ from unittest.mock import MagicMock
 
 from langchain_core.messages import HumanMessage
 
+from tests.unit.factories import (
+    AnswerFactory,
+    MarkdownArticleFactory,
+    ReflectionFactory,
+    RevisedFactory,
+)
 from virgo.core.agent.graph.nodes.format import _create_node_from_chain, create_node
 from virgo.core.agent.graph.state import AnswerState
-from virgo.core.agent.schemas import Answer, MarkdownArticle, Reflection, Revised
 
 
 class DescribeCreateNodeFromChain:
@@ -22,23 +27,18 @@ class DescribeCreateNodeFromChain:
     def it_invokes_chain_with_article_and_references(self):
         """Verify the node invokes the chain with article and references."""
         mock_chain = MagicMock()
-        mock_chain.invoke.return_value = {
-            "parsed": MarkdownArticle(
-                title="Test",
-                summary="Summary",
-                content="Content",
-            ),
-        }
+        article_stub = MarkdownArticleFactory.build(
+            title="Test",
+            summary="Summary",
+            content="Content",
+        )
+        mock_chain.invoke.return_value = {"parsed": article_stub}
 
         node = _create_node_from_chain(mock_chain)
 
-        answer = Answer(
+        answer = AnswerFactory.build(
             value="Test article content",
-            reflection=Reflection(
-                missing="",
-                superfluous="",
-                search_queries=[],
-            ),
+            reflection=ReflectionFactory.build(search_queries=[]),
         )
 
         state: AnswerState = {
@@ -58,23 +58,18 @@ class DescribeCreateNodeFromChain:
     def it_uses_final_answer_value_as_article(self):
         """Verify the node uses final_answer.value as the article."""
         article_content = "This is the article content"
-        answer = Answer(
+        answer = AnswerFactory.build(
             value=article_content,
-            reflection=Reflection(
-                missing="",
-                superfluous="",
-                search_queries=[],
-            ),
+            reflection=ReflectionFactory.build(search_queries=[]),
         )
 
         mock_chain = MagicMock()
-        mock_chain.invoke.return_value = {
-            "parsed": MarkdownArticle(
-                title="Test",
-                summary="Summary",
-                content="Content",
-            ),
-        }
+        formatted_article_stub = MarkdownArticleFactory.build(
+            title="Test",
+            summary="Summary",
+            content="Content",
+        )
+        mock_chain.invoke.return_value = {"parsed": formatted_article_stub}
 
         node = _create_node_from_chain(mock_chain)
 
@@ -92,24 +87,19 @@ class DescribeCreateNodeFromChain:
     def it_includes_references_from_revised_answer(self):
         """Verify the node includes references from Revised answer."""
         references = ["[1] Source A", "[2] Source B"]
-        revised = Revised(
+        revised = RevisedFactory.build(
             value="Answer with citations",
-            reflection=Reflection(
-                missing="",
-                superfluous="",
-                search_queries=[],
-            ),
+            reflection=ReflectionFactory.build(search_queries=[]),
             references=references,
         )
 
         mock_chain = MagicMock()
-        mock_chain.invoke.return_value = {
-            "parsed": MarkdownArticle(
-                title="Test",
-                summary="Summary",
-                content="Content",
-            ),
-        }
+        no_reference_article = MarkdownArticleFactory.build(
+            title="Test",
+            summary="Summary",
+            content="Content",
+        )
+        mock_chain.invoke.return_value = {"parsed": no_reference_article}
 
         node = _create_node_from_chain(mock_chain)
 
@@ -128,18 +118,14 @@ class DescribeCreateNodeFromChain:
 
     def it_uses_none_for_references_when_not_available(self):
         """Verify the node uses 'None' string when references are not available."""
-        answer = Answer(
+        answer = AnswerFactory.build(
             value="Article without references",
-            reflection=Reflection(
-                missing="",
-                superfluous="",
-                search_queries=[],
-            ),
+            reflection=ReflectionFactory.build(search_queries=[]),
         )
 
         mock_chain = MagicMock()
         mock_chain.invoke.return_value = {
-            "parsed": MarkdownArticle(
+            "parsed": MarkdownArticleFactory.build(
                 title="Test",
                 summary="Summary",
                 content="Content",
@@ -162,7 +148,7 @@ class DescribeCreateNodeFromChain:
     def it_returns_empty_messages(self):
         """Verify the node returns state with empty messages."""
         mock_chain = MagicMock()
-        article = MarkdownArticle(
+        article = MarkdownArticleFactory.build(
             title="Test",
             summary="Summary",
             content="Content",
@@ -171,13 +157,9 @@ class DescribeCreateNodeFromChain:
 
         node = _create_node_from_chain(mock_chain)
 
-        answer = Answer(
+        answer = AnswerFactory.build(
             value="Content",
-            reflection=Reflection(
-                missing="",
-                superfluous="",
-                search_queries=[],
-            ),
+            reflection=ReflectionFactory.build(search_queries=[]),
         )
 
         state: AnswerState = {
@@ -192,7 +174,7 @@ class DescribeCreateNodeFromChain:
 
     def it_returns_formatted_article(self):
         """Verify the node returns the formatted article."""
-        article = MarkdownArticle(
+        article = MarkdownArticleFactory.build(
             title="Formatted Title",
             summary="Formatted summary",
             content="Formatted content",
@@ -203,13 +185,9 @@ class DescribeCreateNodeFromChain:
 
         node = _create_node_from_chain(mock_chain)
 
-        answer = Answer(
+        answer = AnswerFactory.build(
             value="Original content",
-            reflection=Reflection(
-                missing="",
-                superfluous="",
-                search_queries=[],
-            ),
+            reflection=ReflectionFactory.build(search_queries=[]),
         )
 
         state: AnswerState = {
@@ -224,16 +202,12 @@ class DescribeCreateNodeFromChain:
 
     def it_preserves_final_answer(self):
         """Verify the node preserves the final_answer in the returned state."""
-        answer = Answer(
+        answer = AnswerFactory.build(
             value="Content",
-            reflection=Reflection(
-                missing="",
-                superfluous="",
-                search_queries=[],
-            ),
+            reflection=ReflectionFactory.build(search_queries=[]),
         )
 
-        article = MarkdownArticle(
+        article = MarkdownArticleFactory.build(
             title="Test",
             summary="Summary",
             content="Content",
@@ -258,7 +232,7 @@ class DescribeCreateNodeFromChain:
         """Verify the node handles None as final_answer."""
         mock_chain = MagicMock()
         mock_chain.invoke.return_value = {
-            "parsed": MarkdownArticle(
+            "parsed": MarkdownArticleFactory.build(
                 title="Test",
                 summary="Summary",
                 content="Content",

@@ -3,7 +3,7 @@
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 from virgo.core.agent.graph.state import AnswerState
-from virgo.core.agent.schemas import Answer, MarkdownArticle, Reflection, Revised
+from virgo.core.agent.schemas import Answer, MarkdownArticle, Revised
 
 
 class DescribeAnswerState:
@@ -74,16 +74,8 @@ class DescribeAnswerState:
         }
         assert isinstance(state["messages"][0], ToolMessage)
 
-    def it_accepts_answer_final_answer(self):
+    def it_accepts_answer_final_answer(self, answer: Answer):
         """Verify AnswerState accepts an Answer object as final_answer."""
-        answer = Answer(
-            value="Test answer content",
-            reflection=Reflection(
-                missing="nothing",
-                superfluous="nothing",
-                search_queries=[],
-            ),
-        )
         state: AnswerState = {
             "messages": [],
             "final_answer": answer,
@@ -92,17 +84,8 @@ class DescribeAnswerState:
         assert state["final_answer"] == answer
         assert isinstance(state["final_answer"], Answer)
 
-    def it_accepts_revised_final_answer(self):
+    def it_accepts_revised_final_answer(self, revised: Revised):
         """Verify AnswerState accepts a Revised object as final_answer."""
-        revised = Revised(
-            value="Revised answer with citations [1]",
-            reflection=Reflection(
-                missing="more sources",
-                superfluous="none",
-                search_queries=[],
-            ),
-            references=["[1] Source, 2024"],
-        )
         state: AnswerState = {
             "messages": [],
             "final_answer": revised,
@@ -120,19 +103,14 @@ class DescribeAnswerState:
         }
         assert state["final_answer"] is None
 
-    def it_accepts_markdown_article(self):
+    def it_accepts_markdown_article(self, markdown_article: MarkdownArticle):
         """Verify AnswerState accepts a MarkdownArticle object."""
-        article = MarkdownArticle(
-            title="Test Article",
-            summary="Brief summary of the article.",
-            content="# Content\n\nDetailed content here.",
-        )
         state: AnswerState = {
             "messages": [],
             "final_answer": None,
-            "formatted_article": article,
+            "formatted_article": markdown_article,
         }
-        assert state["formatted_article"] == article
+        assert state["formatted_article"] == markdown_article
         assert isinstance(state["formatted_article"], MarkdownArticle)
 
     def it_accepts_none_formatted_article(self):
@@ -144,26 +122,15 @@ class DescribeAnswerState:
         }
         assert state["formatted_article"] is None
 
-    def it_accepts_complete_state(self):
+    def it_accepts_complete_state(
+        self, answer: Answer, markdown_article: MarkdownArticle
+    ):
         """Verify AnswerState accepts all fields populated."""
-        answer = Answer(
-            value="Initial answer",
-            reflection=Reflection(
-                missing="details",
-                superfluous="fluff",
-                search_queries=["query 1"],
-            ),
-        )
-        article = MarkdownArticle(
-            title="Article",
-            summary="Summary",
-            content="Content",
-        )
         state: AnswerState = {
             "messages": [HumanMessage(content="question")],
             "final_answer": answer,
-            "formatted_article": article,
+            "formatted_article": markdown_article,
         }
         assert len(state["messages"]) == 1
         assert state["final_answer"] == answer
-        assert state["formatted_article"] == article
+        assert state["formatted_article"] == markdown_article

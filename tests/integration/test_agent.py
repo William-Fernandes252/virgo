@@ -26,17 +26,6 @@ from virgo.core.agent.schemas import MarkdownArticle
 class DescribeVirgoAgent:
     """Integration tests for VirgoAgent."""
 
-    @pytest.fixture
-    def virgo_agent_stub(self) -> VirgoAgent:
-        """Lightweight VirgoAgent stub for tests that patch generate()."""
-
-        class VirgoAgentStub(VirgoAgent):
-            def __init__(self) -> None:  # pragma: no cover - simple test helper
-                self._builder = None  # type: ignore[assignment]
-                self._graph = None  # type: ignore[assignment]
-
-        return VirgoAgentStub()
-
     class DescribeTrajectoryEvaluation:
         """Tests for agent trajectory evaluation."""
 

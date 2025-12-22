@@ -1,13 +1,15 @@
 import operator
 from typing import Annotated, TypedDict
 
+from langchain_core.messages.base import BaseMessage
+
 from virgo.core.agent.schemas import Answer, MarkdownArticle, Revised
 
 
 class AnswerState(TypedDict):
     """The answer graph that produces detailed answers to questions."""
 
-    messages: Annotated[list[Answer | Revised], operator.add]
+    messages: Annotated[list[BaseMessage], operator.add]
     """History of answers and revisions."""
 
     final_answer: Answer | Revised | None

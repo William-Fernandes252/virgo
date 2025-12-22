@@ -3,10 +3,24 @@
 import os
 
 import pytest
+from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
 
-# Default Ollama model for integration tests
-# Can be overridden via OLLAMA_MODEL environment variable
+from virgo.core.agent import VirgoAgent
+
 DEFAULT_OLLAMA_MODEL = "llama3.2:1b"
+"""Default Ollama model for integration tests.
+
+Can be overridden via OLLAMA_MODEL environment variable.
+"""
+
+
+@pytest.fixture
+def virgo_agent_stub():
+    class VirgoAgentStub(VirgoAgent):
+        def __init__(self):
+            self._graph = None
+
+    return VirgoAgentStub()
 
 
 @pytest.fixture
@@ -46,3 +60,28 @@ def sample_question() -> str:
 def simple_question() -> str:
     """Provide a simple question for quick testing."""
     return "What is Python?"
+
+
+@pytest.fixture
+def fake_llm_responses():
+    """Returns a deterministic LLM that we can script."""
+
+    def _create_fake_llm(responses: list[str]):
+        return GenericFakeChatModel(messages=iter(responses))
+
+    return _create_fake_llm
+
+
+@pytest.fixture
+def agent_builder():
+    """A factory to build the VirgoAgent with specific dependencies."""
+
+    from virgo.core.agent import VirgoAgent
+    from virgo.core.agent.graph.builder import VirgoNodes, create_graph_builder
+
+    def _build(nodes: VirgoNodes):
+        graph_builder = create_graph_builder(nodes)
+        graph = graph_builder.compile()
+        return VirgoAgent(graph=graph)
+
+    return _build

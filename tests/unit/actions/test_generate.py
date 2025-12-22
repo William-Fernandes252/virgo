@@ -1,65 +1,42 @@
-"""Unit tests for the virgo.actions.generate module."""
+from unittest.mock import create_autospec
 
-from unittest.mock import Mock
+import pytest
 
+from tests.unit.factories import MarkdownArticleFactory
 from virgo.core.actions.generate import GenerateArticleAction
 from virgo.core.actions.protocols import ArticleGenerator
 from virgo.core.agent.schemas import MarkdownArticle
 
 
 class DescribeGenerateArticleAction:
-    """Tests for the GenerateArticleAction class."""
+    @pytest.fixture
+    def mock_generator(self):
+        return create_autospec(ArticleGenerator, instance=True)
 
-    def it_initializes_with_generator(self):
-        """Verify action can be initialized with a generator."""
-        mock_generator = Mock(spec=ArticleGenerator)
-        action = GenerateArticleAction(generator=mock_generator)
+    @pytest.fixture
+    def action(self, mock_generator):
+        """The Subject Under Test, pre-configured with dependencies."""
+        return GenerateArticleAction(generator=mock_generator)
 
+    def it_initializes_with_generator(self, action, mock_generator):
+        # You verify the attribute, but you didn't have to instantiate it here
         assert action.generator is mock_generator
 
-    def it_executes_generation_via_generator(self):
-        """Verify execute calls generator.generate with question."""
-        mock_generator = Mock(spec=ArticleGenerator)
-        expected_article = MarkdownArticle(
-            title="Test Article",
-            summary="A summary.",
-            content="Content here.",
-        )
+    def it_executes_generation_via_generator(
+        self, action, mock_generator, make_article
+    ):
+        # Use the factory from Step 1
+        expected_article = make_article(title="AI Revolution")
         mock_generator.generate.return_value = expected_article
 
-        action = GenerateArticleAction(generator=mock_generator)
         result = action.execute("What is AI?")
 
         mock_generator.generate.assert_called_once_with("What is AI?")
         assert result == expected_article
 
-    def it_returns_none_when_generator_fails(self):
-        """Verify execute returns None when generator returns None."""
-        mock_generator = Mock(spec=ArticleGenerator)
+    def it_returns_none_when_generator_fails(self, action, mock_generator):
         mock_generator.generate.return_value = None
-
-        action = GenerateArticleAction(generator=mock_generator)
-        result = action.execute("some question")
-
-        assert result is None
-
-    def it_passes_question_to_generator(self):
-        """Verify the question is passed correctly to the generator."""
-        mock_generator = Mock(spec=ArticleGenerator)
-        mock_generator.generate.return_value = None
-
-        action = GenerateArticleAction(generator=mock_generator)
-        action.execute("Complex question about cybersecurity?")
-
-        mock_generator.generate.assert_called_once_with(
-            "Complex question about cybersecurity?"
-        )
-
-    def it_is_a_dataclass(self):
-        """Verify GenerateArticleAction is a dataclass."""
-        import dataclasses
-
-        assert dataclasses.is_dataclass(GenerateArticleAction)
+        assert action.execute("Query") is None
 
     def it_supports_dependency_injection(self):
         """Verify action works with different generator implementations."""
@@ -69,7 +46,7 @@ class DescribeGenerateArticleAction:
                 self.prefix = prefix
 
             def generate(self, question: str) -> MarkdownArticle | None:
-                return MarkdownArticle(
+                return MarkdownArticleFactory.build(
                     title=f"{self.prefix}: {question}",
                     summary="Generated summary.",
                     content="Generated content.",

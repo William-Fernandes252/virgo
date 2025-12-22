@@ -4,9 +4,10 @@ from unittest.mock import MagicMock
 
 from langchain_core.messages import HumanMessage
 
+from tests.unit.factories import ReflectionFactory, RevisedFactory
 from virgo.core.agent.graph.nodes.revise import create_node
 from virgo.core.agent.graph.state import AnswerState
-from virgo.core.agent.schemas import Reflection, Revised
+from virgo.core.agent.schemas import Revised
 
 
 class DescribeCreateNode:
@@ -22,13 +23,9 @@ class DescribeCreateNode:
 
     def it_invokes_chain_with_messages(self):
         """Verify the node invokes the chain with messages from state."""
-        revised_answer = Revised(
+        revised_answer = RevisedFactory.build(
             value="Revised answer with citations [1]",
-            reflection=Reflection(
-                missing="more sources",
-                superfluous="none",
-                search_queries=[],
-            ),
+            reflection=ReflectionFactory.build(search_queries=[]),
             references=["[1] Source, 2024"],
         )
 
@@ -59,13 +56,9 @@ class DescribeCreateNode:
     def it_returns_updated_state_with_raw_message(self):
         """Verify the node returns state with raw message."""
         raw_message = HumanMessage(content="raw revised")
-        revised_answer = Revised(
+        revised_answer = RevisedFactory.build(
             value="Revised answer",
-            reflection=Reflection(
-                missing="",
-                superfluous="",
-                search_queries=[],
-            ),
+            reflection=ReflectionFactory.build(search_queries=[]),
             references=[],
         )
 
@@ -90,13 +83,9 @@ class DescribeCreateNode:
 
     def it_returns_updated_state_with_revised_answer(self):
         """Verify the node returns state with Revised answer as final_answer."""
-        revised_answer = Revised(
+        revised_answer = RevisedFactory.build(
             value="Revised content with citations",
-            reflection=Reflection(
-                missing="more details",
-                superfluous="irrelevant info",
-                search_queries=["query"],
-            ),
+            reflection=ReflectionFactory.build(search_queries=["query"]),
             references=["[1] Reference"],
         )
 
@@ -124,13 +113,9 @@ class DescribeCreateNode:
         mock_chain = MagicMock()
         mock_chain.invoke.return_value = {
             "raw": HumanMessage(content="raw"),
-            "parsed": Revised(
+            "parsed": RevisedFactory.build(
                 value="Answer",
-                reflection=Reflection(
-                    missing="",
-                    superfluous="",
-                    search_queries=[],
-                ),
+                reflection=ReflectionFactory.build(search_queries=[]),
                 references=[],
             ),
         }
@@ -149,13 +134,9 @@ class DescribeCreateNode:
 
     def it_handles_revised_answer_with_references(self):
         """Verify the node handles Revised answers with references."""
-        revised_answer = Revised(
+        revised_answer = RevisedFactory.build(
             value="Answer with multiple citations [1][2]",
-            reflection=Reflection(
-                missing="",
-                superfluous="",
-                search_queries=[],
-            ),
+            reflection=ReflectionFactory.build(search_queries=[]),
             references=[
                 "[1] Source A",
                 "[2] Source B",
