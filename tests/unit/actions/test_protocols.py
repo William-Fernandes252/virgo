@@ -1,5 +1,6 @@
 """Unit tests for the virgo.actions.protocols module."""
 
+from tests.unit.factories import MarkdownArticleFactory
 from virgo.core.actions.protocols import ArticleGenerator
 from virgo.core.agent.schemas import MarkdownArticle
 
@@ -17,11 +18,7 @@ class DescribeArticleGeneratorProtocol:
 
         class MockGenerator:
             def generate(self, question: str) -> MarkdownArticle | None:
-                return MarkdownArticle(
-                    title="Test",
-                    summary="Summary",
-                    content="Content",
-                )
+                return MarkdownArticleFactory.build()
 
         # This should not raise - the mock conforms to the protocol
         generator: ArticleGenerator = MockGenerator()
