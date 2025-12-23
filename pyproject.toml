@@ -44,11 +44,11 @@ lint = "ruff check . --fix"
 "lint:ci" = "ruff check ."
 format = "ruff format . --fix"
 "format:ci" = "ruff format . --check"
-type-check = "mypy virgo tests integration"
+type-check = "mypy virgo tests"
 test = "pytest tests/unit"
 "test:watch" = "pytest-watcher virgo --patterns '*.py' --runner 'pytest tests/unit'"
 "test:cov" = "pytest tests/unit --cov=virgo --cov-report=term-missing"
-"test:ci" = "pytest tests integration --cov=virgo --cov-report=xml --cov-report=term-missing"
+"test:ci" = "pytest tests --cov=virgo --cov-report=xml --cov-report=term-missing"
 integration = "pytest tests/integration"
 
 [tool.pytest.ini_options]
