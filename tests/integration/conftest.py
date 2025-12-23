@@ -1,17 +1,15 @@
 """Pytest configuration for integration tests."""
 
-import os
+from collections.abc import Iterator
+from typing import Any, Self
 
 import pytest
-from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
+from langchain_core.language_models import BaseChatModel
+from langchain_core.messages import BaseMessage
+from langchain_core.outputs import ChatGeneration, ChatResult
+from pydantic import PrivateAttr
 
 from virgo.core.agent import VirgoAgent
-
-DEFAULT_OLLAMA_MODEL = "llama3.2:1b"
-"""Default Ollama model for integration tests.
-
-Can be overridden via OLLAMA_MODEL environment variable.
-"""
 
 
 @pytest.fixture
@@ -23,31 +21,47 @@ def virgo_agent_stub():
     return VirgoAgentStub()
 
 
-@pytest.fixture
-def ollama_model() -> str:
-    """Provide the Ollama model name for LLM-based tests.
+class FakeChatModel(BaseChatModel):
+    """A Fake Chat Model that supports tool binding and returns pre-canned responses.
 
-    The model can be configured via the OLLAMA_MODEL environment variable.
-    Defaults to 'llama3.2:1b' for fast, cost-effective testing.
-
-    Returns:
-        str: The Ollama model identifier in LangChain format (e.g., 'ollama:llama3.2:1b')
+    This replaces GenericFakeChatModel to ensure compatibility with 'with_structured_output'
+    and consistent behavior across test environments.
     """
-    model_name = os.getenv("OLLAMA_MODEL", DEFAULT_OLLAMA_MODEL)
-    return f"ollama:{model_name}"
 
+    _responses: Iterator[BaseMessage] = PrivateAttr()
 
-@pytest.fixture
-def ollama_base_url() -> str:
-    """Provide the Ollama API base URL.
+    def __init__(self, responses: list[BaseMessage]):
+        super().__init__()
+        self._responses = iter(responses)
 
-    Can be configured via the OLLAMA_BASE_URL environment variable.
-    Defaults to 'http://localhost:11434' for local Docker setup.
+    def _generate(
+        self,
+        messages: list[BaseMessage],
+        stop: list[str] | None = None,
+        run_manager: object = None,
+        **kwargs: object,
+    ) -> ChatResult:
+        """Generate the next pre-canned response."""
+        try:
+            response = next(self._responses)
+        except StopIteration:
+            raise ValueError(
+                "FakeChatModel: Not enough responses provided for execution."
+            )
 
-    Returns:
-        str: The Ollama API base URL
-    """
-    return os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        return ChatResult(generations=[ChatGeneration(message=response)])
+
+    def bind_tools(self, tools: Any, **kwargs: Any) -> Self:
+        """Mock bind_tools to allow the agent to 'bind' tools.
+
+        We return self because the responses are already pre-canned with the
+        expected tool calls, so we don't need real tool binding logic.
+        """
+        return self
+
+    @property
+    def _llm_type(self) -> str:
+        return "fake-chat-model"
 
 
 @pytest.fixture
@@ -66,8 +80,8 @@ def simple_question() -> str:
 def fake_llm_responses():
     """Returns a deterministic LLM that we can script."""
 
-    def _create_fake_llm(responses: list[str]):
-        return GenericFakeChatModel(messages=iter(responses))
+    def _create_fake_llm(responses: list[BaseMessage]):
+        return FakeChatModel(responses=responses)
 
     return _create_fake_llm
 

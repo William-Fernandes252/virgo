@@ -22,11 +22,9 @@ class DescribeGenerateArticleAction:
         # You verify the attribute, but you didn't have to instantiate it here
         assert action.generator is mock_generator
 
-    def it_executes_generation_via_generator(
-        self, action, mock_generator, make_article
-    ):
+    def it_executes_generation_via_generator(self, action, mock_generator):
         # Use the factory from Step 1
-        expected_article = make_article(title="AI Revolution")
+        expected_article = MarkdownArticleFactory.build(title="AI Revolution")
         mock_generator.generate.return_value = expected_article
 
         result = action.execute("What is AI?")

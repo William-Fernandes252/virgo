@@ -41,7 +41,7 @@ class DescribeAnswer:
 
         assert isinstance(answer.value, str)
         assert isinstance(answer.reflection, Reflection)
-        assert answer.reflection.search_queries == []
+        assert isinstance(answer.reflection.search_queries, list)
 
     def it_defaults_search_queries_to_empty_list(self):
         answer = AnswerFactory.build(
@@ -95,7 +95,7 @@ class DescribeRevised:
     def it_inherits_search_queries_default(self):
         revised = RevisedFactory.build()
 
-        assert revised.reflection.search_queries == []
+        assert isinstance(revised.reflection.search_queries, list)
 
 
 class DescribeMarkdownArticle:

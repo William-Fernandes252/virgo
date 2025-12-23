@@ -1,300 +1,315 @@
-"""Integration tests for the Virgo agent using agentevals."""
+"""Integration tests for the Virgo agent workflow.
 
-import json
-from unittest.mock import patch
+These tests validate the full graph execution using a deterministic fake LLM
+and a mock researcher. This ensures the agent follows the expected trajectory:
+Draft -> Research -> Revise -> (Loop) -> Format.
+"""
+
+from unittest.mock import MagicMock, patch
 
 import pytest
-from agentevals.trajectory.llm import (  # type: ignore[import-untyped]
-    TRAJECTORY_ACCURACY_PROMPT,
-    create_trajectory_llm_as_judge,
-)
-from agentevals.trajectory.match import (  # type: ignore[import-untyped]
-    create_trajectory_match_evaluator,
-)
+from langchain_core.messages import AIMessage
 
-from virgo.core.agent import VirgoAgent
-from virgo.core.agent.graph.builder import (
-    DRAFT,
-    FORMAT,
-    RESEARCH,
-    REVISE,
-    VIRGO_MAX_ITERATIONS,
-)
+from virgo.core.agent.graph.nodes import draft, research, revise
+from virgo.core.agent.graph.nodes import format as format_node
 from virgo.core.agent.schemas import MarkdownArticle
 
 
 class DescribeVirgoAgent:
-    """Integration tests for VirgoAgent."""
-
-    class DescribeTrajectoryEvaluation:
-        """Tests for agent trajectory evaluation."""
-
-        def it_should_use_search_tools_in_trajectory(self) -> None:
-            """Test that the agent's trajectory includes proper tool usage."""
-            # Create a mock trajectory representing expected agent behavior
-            reference_trajectory = [
-                {"role": "user", "content": "What is Python?"},
-                {
-                    "role": "assistant",
-                    "content": "",
-                    "tool_calls": [
-                        {
-                            "function": {
-                                "name": "tavily_search",
-                                "arguments": json.dumps(
-                                    {"query": "Python programming language"}
-                                ),
-                            }
-                        }
-                    ],
-                },
-                {
-                    "role": "tool",
-                    "content": "Python is a high-level programming language...",
-                },
-                {
-                    "role": "assistant",
-                    "content": "Python is a versatile programming language...",
-                },
-            ]
-
-            # Create the trajectory match evaluator with superset mode
-            # (agent output should contain at least the reference tool calls)
-            evaluator = create_trajectory_match_evaluator(
-                trajectory_match_mode="superset",
-                tool_args_match_mode="ignore",  # Ignore specific arguments
-            )
-
-            # Simulated agent trajectory for testing
-            simulated_agent_trajectory = [
-                {"role": "user", "content": "What is Python?"},
-                {
-                    "role": "assistant",
-                    "content": "",
-                    "tool_calls": [
-                        {
-                            "function": {
-                                "name": "tavily_search",
-                                "arguments": json.dumps(
-                                    {"query": "Python programming language overview"}
-                                ),
-                            }
-                        }
-                    ],
-                },
-                {
-                    "role": "tool",
-                    "content": "Python is a high-level, general-purpose programming language...",
-                },
-                {
-                    "role": "assistant",
-                    "content": "",
-                    "tool_calls": [
-                        {
-                            "function": {
-                                "name": "tavily_search",
-                                "arguments": json.dumps(
-                                    {"query": "Python features and use cases"}
-                                ),
-                            }
-                        }
-                    ],
-                },
-                {
-                    "role": "tool",
-                    "content": "Python is used for web development, data science...",
-                },
-                {
-                    "role": "assistant",
-                    "content": "Python is a versatile programming language known for...",
-                },
-            ]
-
-            result = evaluator(
-                outputs=simulated_agent_trajectory,
-                reference_outputs=reference_trajectory,
-            )
-
-            assert result["score"] is True, (
-                f"Trajectory evaluation failed: {result.get('comment')}"
-            )
-
-        def it_should_match_unordered_tool_calls(self) -> None:
-            """Test that tool calls can be matched in any order."""
-            outputs = [
-                {"role": "user", "content": "Compare Python and JavaScript"},
-                {
-                    "role": "assistant",
-                    "content": "",
-                    "tool_calls": [
-                        {
-                            "function": {
-                                "name": "tavily_search",
-                                "arguments": json.dumps(
-                                    {"query": "JavaScript features"}
-                                ),
-                            }
-                        },
-                        {
-                            "function": {
-                                "name": "tavily_search",
-                                "arguments": json.dumps({"query": "Python features"}),
-                            }
-                        },
-                    ],
-                },
-                {"role": "tool", "content": "JavaScript is a scripting language..."},
-                {"role": "tool", "content": "Python is a programming language..."},
-                {"role": "assistant", "content": "Here's a comparison..."},
-            ]
-
-            reference_outputs = [
-                {"role": "user", "content": "Compare Python and JavaScript"},
-                {
-                    "role": "assistant",
-                    "content": "",
-                    "tool_calls": [
-                        {
-                            "function": {
-                                "name": "tavily_search",
-                                "arguments": json.dumps({"query": "Python features"}),
-                            }
-                        },
-                        {
-                            "function": {
-                                "name": "tavily_search",
-                                "arguments": json.dumps(
-                                    {"query": "JavaScript features"}
-                                ),
-                            }
-                        },
-                    ],
-                },
-                {"role": "tool", "content": "Python is a programming language..."},
-                {"role": "tool", "content": "JavaScript is a scripting language..."},
-                {"role": "assistant", "content": "Here's a comparison..."},
-            ]
-
-            evaluator = create_trajectory_match_evaluator(
-                trajectory_match_mode="unordered",
-                tool_args_match_mode="ignore",
-            )
-
-            result = evaluator(
-                outputs=outputs,
-                reference_outputs=reference_outputs,
-            )
-
-            assert result["score"] is True, "Unordered trajectory match should succeed"
-
-    class DescribeAgentOutput:
-        """Tests for agent output validation."""
-
-        def it_should_generate_markdown_article_structure(
-            self, virgo_agent_stub: VirgoAgent
-        ) -> None:
-            """Test that the agent generates a properly structured MarkdownArticle."""
-            # Create a mock graph that returns a valid MarkdownArticle
-            mock_article = MarkdownArticle(
-                title="What is Python?",
-                summary="Python is a high-level programming language.",
-                content="# Python\n\nPython is a versatile programming language...",
-                references=["https://python.org"],
-            )
-
-            with patch.object(VirgoAgent, "generate", return_value=mock_article):
-                result = virgo_agent_stub.generate("What is Python?")
-
-                assert result is not None
-                assert isinstance(result, MarkdownArticle)
-                assert result.title == "What is Python?"
-                assert len(result.content) > 0
-                assert len(result.references) > 0
-
-        def it_should_return_none_for_failed_generation(
-            self, virgo_agent_stub: VirgoAgent
-        ) -> None:
-            """Test that the agent returns None when generation fails."""
-            with patch.object(VirgoAgent, "generate", return_value=None):
-                result = virgo_agent_stub.generate("Invalid query")
-
-                assert result is None
-
-
-class DescribeLLMAsJudgeEvaluation:
-    """Tests using LLM-as-judge for trajectory evaluation."""
+    """Tests for the full agent execution workflow."""
 
     @pytest.fixture
-    def check_ollama_available(self, ollama_base_url: str) -> bool:
-        """Check if Ollama server is available."""
-        import httpx
+    def mock_researcher(self):
+        """A mock researcher that returns deterministic results."""
 
-        try:
-            response = httpx.get(f"{ollama_base_url}/api/tags", timeout=2.0)
-            return response.status_code == 200
-        except (httpx.ConnectError, httpx.TimeoutException):
-            return False
+        def _research(reflection, value, references=None):
+            return [
+                f"Source A for query: {reflection.search_queries[0]}",
+                "Source B: Python is a dynamic language.",
+            ]
 
-    def it_should_evaluate_trajectory_with_llm(
-        self,
-        ollama_model: str,
-        ollama_base_url: str,
-        check_ollama_available: bool,
+        return _research
+
+    def it_should_execute_happy_path_trajectory(
+        self, agent_builder, fake_llm_responses, mock_researcher
     ) -> None:
-        """Test LLM-based trajectory evaluation using Ollama."""
-        if not check_ollama_available:
-            pytest.skip(f"Ollama server not available at {ollama_base_url}")
+        """Test the standard flow: Draft -> Research -> Revise -> Format.
 
-        evaluator = create_trajectory_llm_as_judge(
-            prompt=TRAJECTORY_ACCURACY_PROMPT,
-            model=ollama_model,
+        We simulate a scenario where the agent is allowed 2 iterations (Draft + 1 Revision).
+        """
+        # 1. Prepare Fake LLM Responses
+        # The agent needs 3 responses from the LLM for this path:
+        #   1. Draft Node: Returns an 'Answer' tool call.
+        #   2. Revise Node: Returns a 'Revised' tool call.
+        #   3. Format Node: Returns a 'MarkdownArticle' tool call.
+
+        # Response 1: Initial Draft
+        draft_content = "Python is a programming language."
+        draft_msg = AIMessage(
+            content="",
+            tool_calls=[
+                {
+                    "name": "Answer",
+                    "args": {
+                        "value": draft_content,
+                        "reflection": {
+                            "missing": "history",
+                            "superfluous": "none",
+                            "search_queries": ["python history"],
+                        },
+                    },
+                    "id": "call_draft_1",
+                }
+            ],
         )
 
-        outputs = [
-            {"role": "user", "content": "What is the capital of France?"},
-            {
-                "role": "assistant",
-                "content": "",
-                "tool_calls": [
+        # Response 2: Revision (after research)
+        revised_content = "Python was created by Guido van Rossum."
+        revise_msg = AIMessage(
+            content="",
+            tool_calls=[
+                {
+                    "name": "Revised",
+                    "args": {
+                        "value": revised_content,
+                        "reflection": {
+                            "missing": "none",
+                            "superfluous": "none",
+                            "search_queries": ["python version"],
+                        },
+                        "references": ["[1] History of Python"],
+                    },
+                    "id": "call_revise_1",
+                }
+            ],
+        )
+
+        # Response 3: Formatting
+        final_article = {
+            "title": "The History of Python",
+            "summary": "A brief look at Python's origins.",
+            "content": "# The History of Python\n\nPython was created by...",
+            "references": ["[1] History of Python"],
+        }
+        format_msg = AIMessage(
+            content="",
+            tool_calls=[
+                {
+                    "name": "MarkdownArticle",
+                    "args": final_article,
+                    "id": "call_format_1",
+                }
+            ],
+        )
+
+        # Create the deterministic LLM
+        llm = fake_llm_responses([draft_msg, revise_msg, format_msg])
+
+        # 2. Build the Agent
+        nodes = {
+            "DRAFT": draft.create_node(llm),
+            "RESEARCH": research.create_node(mock_researcher),
+            "REVISE": revise.create_node(llm),
+            "FORMAT": format_node.create_node(llm),
+        }
+
+        # 3. Execute with patched Max Iterations
+        # Setting max_iterations to 2 ensures:
+        # Iteration 1: Draft (count=1) -> Research
+        # Iteration 2: Revise (count=2) -> Loop Check (>=2?) -> Format
+        with patch("virgo.core.agent.graph.builder.VIRGO_MAX_ITERATIONS", 2):
+            agent = agent_builder(nodes)
+            result = agent.generate("Tell me about Python history.")
+
+        # 4. Assertions
+        assert result is not None
+        assert isinstance(result, MarkdownArticle)
+        assert result.title == "The History of Python"
+        assert result.content.startswith("# The History of Python")
+
+    def it_should_handle_loops_correctly(
+        self, agent_builder, fake_llm_responses, mock_researcher
+    ) -> None:
+        """Test that the agent loops back to research if max iterations is high."""
+
+        # Verify: Draft -> Research -> Revise -> Research -> Revise -> Format
+        # This requires max_iterations >= 3 (Draft=1, Revise1=2, Revise2=3)
+
+        # Messages: Draft, Revise 1, Revise 2, Format
+        msgs = [
+            AIMessage(
+                content="",
+                tool_calls=[
                     {
-                        "function": {
-                            "name": "search",
-                            "arguments": json.dumps({"query": "capital of France"}),
-                        }
+                        "name": "Answer",
+                        "args": {
+                            "value": "v1",
+                            "reflection": {
+                                "missing": "x",
+                                "superfluous": "",
+                                "search_queries": ["q1"],
+                            },
+                        },
+                        "id": "1",
                     }
                 ],
-            },
-            {
-                "role": "tool",
-                "content": "Paris is the capital and largest city of France.",
-            },
-            {"role": "assistant", "content": "The capital of France is Paris."},
+            ),
+            AIMessage(
+                content="",
+                tool_calls=[
+                    {
+                        "name": "Revised",
+                        "args": {
+                            "value": "v2",
+                            "reflection": {
+                                "missing": "y",
+                                "superfluous": "",
+                                "search_queries": ["q2"],
+                            },
+                            "references": [],
+                        },
+                        "id": "2",
+                    }
+                ],
+            ),
+            AIMessage(
+                content="",
+                tool_calls=[
+                    {
+                        "name": "Revised",
+                        "args": {
+                            "value": "v3",
+                            "reflection": {
+                                "missing": "none",
+                                "superfluous": "",
+                                "search_queries": [],
+                            },
+                            "references": [],
+                        },
+                        "id": "3",
+                    }
+                ],
+            ),
+            AIMessage(
+                content="",
+                tool_calls=[
+                    {
+                        "name": "MarkdownArticle",
+                        "args": {
+                            "title": "Final",
+                            "summary": "S",
+                            "content": "C",
+                            "references": [],
+                        },
+                        "id": "4",
+                    }
+                ],
+            ),
         ]
 
-        result = evaluator(outputs=outputs)
+        llm = fake_llm_responses(msgs)
 
-        assert result["score"] is True, (
-            f"LLM evaluation failed: {result.get('comment')}"
+        # Spy on researcher to verify it's called twice
+        research_spy = MagicMock(side_effect=mock_researcher)
+
+        nodes = {
+            "DRAFT": draft.create_node(llm),
+            "RESEARCH": research.create_node(research_spy),
+            "REVISE": revise.create_node(llm),
+            "FORMAT": format_node.create_node(llm),
+        }
+
+        # Set max_iterations to 3.
+        # Flow:
+        # 1. Draft (tool_invocations=1) -> Research
+        # 2. Research (does not increment tool invocations on message history usually, but produces ToolMessage)
+        # 3. Revise (tool_invocations=2) -> Loop Check (2 < 3) -> Research
+        # 4. Research
+        # 5. Revise (tool_invocations=3) -> Loop Check (3 >= 3) -> Format
+        # 6. Format -> End
+        with patch("virgo.core.agent.graph.builder.VIRGO_MAX_ITERATIONS", 3):
+            agent = agent_builder(nodes)
+            agent.generate("Loop test")
+
+        assert research_spy.call_count == 2, (
+            "Researcher should be called twice in this loop scenario"
         )
 
+    def it_should_produce_valid_markdown_from_real_execution(
+        self, agent_builder, fake_llm_responses, mock_researcher
+    ):
+        """Verify the integration of the Format node producing the final artifact."""
 
-class DescribeGraphTrajectory:
-    """Tests for LangGraph-specific trajectory validation."""
+        # Simulating a direct flow where Draft is good enough (unlikely in real logic but possible in graph)
+        # If we set MAX_ITERATIONS = 1, Draft -> Research -> Revise -> Format?
+        # Actually logic is: if count >= Max.
+        # Draft is 1 call.
+        # If Max=1: Draft(1) -> Research -> Revise(2) -> Loop(2>=1) -> Format.
+        # So even with Max=1, we get one revision cycle because check is AFTER Revise.
 
-    def it_should_follow_expected_node_sequence(self) -> None:
-        """Test that the agent follows the expected node sequence."""
-        # Expected node sequence for Virgo: draft -> research -> revise -> format
-        expected_nodes = [DRAFT, RESEARCH, REVISE, FORMAT]
+        draft_msg = AIMessage(
+            content="",
+            tool_calls=[
+                {
+                    "name": "Answer",
+                    "args": {
+                        "value": "Draft",
+                        "reflection": {
+                            "missing": "",
+                            "superfluous": "",
+                            "search_queries": ["q"],
+                        },
+                    },
+                    "id": "1",
+                }
+            ],
+        )
+        revise_msg = AIMessage(
+            content="",
+            tool_calls=[
+                {
+                    "name": "Revised",
+                    "args": {
+                        "value": "Revised",
+                        "reflection": {
+                            "missing": "",
+                            "superfluous": "",
+                            "search_queries": [],
+                        },
+                        "references": [],
+                    },
+                    "id": "2",
+                }
+            ],
+        )
+        format_msg = AIMessage(
+            content="",
+            tool_calls=[
+                {
+                    "name": "MarkdownArticle",
+                    "args": {
+                        "title": "Title",
+                        "summary": "Sum",
+                        "content": "**Bold** Content",
+                        "references": [],
+                    },
+                    "id": "3",
+                }
+            ],
+        )
 
-        # Verify node sequence matches expected flow
-        # This is a structural test - in real integration, we'd capture from actual execution
-        assert expected_nodes[0] == DRAFT, "Graph should start with draft node"
-        assert expected_nodes[-1] == FORMAT, "Graph should end with format node"
-        assert RESEARCH in expected_nodes, "Graph should include research"
-        assert REVISE in expected_nodes, "Graph should include revise"
+        llm = fake_llm_responses([draft_msg, revise_msg, format_msg])
 
-    def it_should_respect_max_iterations(self) -> None:
-        """Test that the agent respects the maximum iterations limit."""
-        # Verify that VIRGO_MAX_ITERATIONS is respected
-        assert VIRGO_MAX_ITERATIONS > 0, "Max iterations should be positive"
-        assert VIRGO_MAX_ITERATIONS <= 10, "Max iterations should be reasonable"
+        nodes = {
+            "DRAFT": draft.create_node(llm),
+            "RESEARCH": research.create_node(mock_researcher),
+            "REVISE": revise.create_node(llm),
+            "FORMAT": format_node.create_node(llm),
+        }
+
+        with patch("virgo.core.agent.graph.builder.VIRGO_MAX_ITERATIONS", 1):
+            agent = agent_builder(nodes)
+            article = agent.generate("Quick check.")
+
+        assert article.content == "**Bold** Content"
+        assert article.title == "Title"

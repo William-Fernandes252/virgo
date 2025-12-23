@@ -1,6 +1,6 @@
 """Unit tests for the revise node module."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from langchain_core.messages import HumanMessage
 
@@ -17,7 +17,11 @@ class DescribeCreateNode:
         """Verify create_node returns a callable state node."""
         mock_chain = MagicMock()
 
-        node = create_node(mock_chain)
+        with patch(
+            "virgo.core.agent.graph.nodes.revise.revisor.create_chain",
+            return_value=mock_chain,
+        ):
+            node = create_node(MagicMock())
 
         assert callable(node)
 
@@ -35,7 +39,11 @@ class DescribeCreateNode:
             "parsed": revised_answer,
         }
 
-        node = create_node(mock_chain)
+        with patch(
+            "virgo.core.agent.graph.nodes.revise.revisor.create_chain",
+            return_value=mock_chain,
+        ):
+            node = create_node(MagicMock())
 
         state: AnswerState = {
             "messages": [
@@ -68,18 +76,22 @@ class DescribeCreateNode:
             "parsed": revised_answer,
         }
 
-        node = create_node(mock_chain)
-
         state: AnswerState = {
             "messages": [HumanMessage(content="Question")],
             "final_answer": None,
             "formatted_article": None,
         }
 
+        original_messages = state["messages"].copy()
+        with patch(
+            "virgo.core.agent.graph.nodes.revise.revisor.create_chain",
+            return_value=mock_chain,
+        ):
+            node = create_node(MagicMock())
         result = node(state)
 
-        assert len(result["messages"]) == 1
-        assert result["messages"][0] == raw_message
+        expected_messages = [*original_messages, raw_message]
+        assert result["messages"] == expected_messages
 
     def it_returns_updated_state_with_revised_answer(self):
         """Verify the node returns state with Revised answer as final_answer."""
@@ -95,7 +107,11 @@ class DescribeCreateNode:
             "parsed": revised_answer,
         }
 
-        node = create_node(mock_chain)
+        with patch(
+            "virgo.core.agent.graph.nodes.revise.revisor.create_chain",
+            return_value=mock_chain,
+        ):
+            node = create_node(MagicMock())
 
         state: AnswerState = {
             "messages": [HumanMessage(content="Question")],
@@ -120,7 +136,11 @@ class DescribeCreateNode:
             ),
         }
 
-        node = create_node(mock_chain)
+        with patch(
+            "virgo.core.agent.graph.nodes.revise.revisor.create_chain",
+            return_value=mock_chain,
+        ):
+            node = create_node(MagicMock())
 
         state: AnswerState = {
             "messages": [HumanMessage(content="Question")],
@@ -149,7 +169,11 @@ class DescribeCreateNode:
             "parsed": revised_answer,
         }
 
-        node = create_node(mock_chain)
+        with patch(
+            "virgo.core.agent.graph.nodes.revise.revisor.create_chain",
+            return_value=mock_chain,
+        ):
+            node = create_node(MagicMock())
 
         state: AnswerState = {
             "messages": [HumanMessage(content="Question")],
