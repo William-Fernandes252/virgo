@@ -18,7 +18,7 @@ class DescribeArticleGeneratorProtocol:
 
         class MockGenerator:
             def generate(self, question: str) -> MarkdownArticle | None:
-                return MarkdownArticleFactory.build()
+                return MarkdownArticleFactory.build(title="Test")
 
         # This should not raise - the mock conforms to the protocol
         generator: ArticleGenerator = MockGenerator()
