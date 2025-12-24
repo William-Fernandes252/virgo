@@ -7,9 +7,9 @@ This package is organized into three main subpackages:
 """
 
 # Re-export main classes for convenience
-from virgo.actions import ArticleGenerator, GenerateArticleAction
-from virgo.agent import VirgoAgent
-from virgo.agent.schemas import MarkdownArticle
+from virgo.core.actions import ArticleGenerator, GenerateArticleAction
+from virgo.core.agent import VirgoAgent
+from virgo.core.agent.schemas import MarkdownArticle
 
 __all__ = [
     "ArticleGenerator",

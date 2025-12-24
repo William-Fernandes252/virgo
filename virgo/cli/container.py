@@ -1,52 +1,18 @@
 """Dependency injection container for Virgo CLI."""
 
-from typing import Annotated, Literal
-
 from dependency_injector import containers, providers
-from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from langchain_tavily import TavilySearch
 
-from virgo.actions import GenerateArticleAction
-from virgo.agent.factories import create_virgo_agent
-from virgo.agent.llms import (
+from virgo.core.actions import GenerateArticleAction
+from virgo.core.agent import VirgoAgent
+from virgo.core.agent.graph import create_graph
+from virgo.core.agent.llms import (
     LanguageModelProvider,
     OllamaLanguageModelProvider,
     OpenAILanguageModelProvider,
 )
-
-type _GenAIProvider = Literal["openai", "ollama"]
-"""Supported GenAI providers."""
-
-
-class VirgoSettings(BaseSettings):
-    """Settings for the Virgo application."""
-
-    model_config = SettingsConfigDict(env_prefix="virgo_")
-
-    genai_provider: Annotated[
-        _GenAIProvider,
-        Field(
-            help="The GenAI provider to use for language model interactions.",
-        ),
-    ] = "openai"
-    model_name: Annotated[
-        str,
-        Field(
-            help="""
-            The name of the model to use from the GenAI provider.
-                                
-            It should correspond to a valid model name for the selected provider. Also, ensure that the model supports tool usage.
-                                    
-            It is recommended to use models with reliable reasoning capabilities.
-            """,
-        ),
-    ] = "gpt-4-turbo"
-    max_iterations: Annotated[
-        int,
-        Field(
-            help="The maximum number of iterations for the Virgo agent's reasoning process.",
-        ),
-    ] = 5
+from virgo.core.agent.tools import TavilyResearcher
+from virgo.core.settings import VirgoSettings
 
 
 class Container(containers.DeclarativeContainer):
@@ -69,7 +35,7 @@ class Container(containers.DeclarativeContainer):
         modules=["virgo.cli.commands"],
     )
 
-    config = providers.Configuration(strict=True)
+    config = providers.Configuration(strict=True, pydantic_settings=[VirgoSettings()])
     """The configuration provider for Virgo settings."""
 
     _language_model_provider = providers.Selector[LanguageModelProvider](
@@ -84,9 +50,25 @@ class Container(containers.DeclarativeContainer):
         model_name=config.model_name,
     )
 
-    _agent = providers.Singleton(
-        create_virgo_agent,
+    _tavily_tool = providers.Singleton(
+        TavilySearch,
+        max_results=5,
+    )
+
+    _researcher = providers.Callable(
+        TavilyResearcher,
+        tool=_tavily_tool,
+    )
+
+    _graph = providers.Singleton(
+        create_graph,
         llm=_chat_model,
+        researcher=_researcher,
+    )
+
+    _agent = providers.Singleton(
+        VirgoAgent,
+        graph=_graph,
     )
     """The Virgo agent singleton provider."""
 
@@ -99,5 +81,4 @@ class Container(containers.DeclarativeContainer):
 
 __all__ = [
     "Container",
-    "VirgoSettings",
 ]

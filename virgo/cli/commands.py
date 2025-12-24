@@ -7,8 +7,8 @@ from dependency_injector.wiring import Provide, inject
 from rich.console import Console
 from rich.markdown import Markdown
 
-from virgo.actions import GenerateArticleAction
 from virgo.cli.container import Container
+from virgo.core.actions import GenerateArticleAction
 
 app = typer.Typer(
     name="virgo",
